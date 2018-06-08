@@ -6,23 +6,25 @@ A LaunchBox plugin designed to allow roms/emulators to easily be launched with S
 
 Here are just a few of the features or benefits provided by using this plugin:
 
-```
 * Allow LaunchBox to do what its good at - be the sole organizer and maintainer of your rom/game collection, without having to duplicate its functionality in Steam (something it was not designed for)
+
 * Keep your Steam library clean and uncluttered by hundreds of emulator/rom shortcuts
+
 * Get all of the benefits of Steam's excellent overlay system while playing any rom or emulator
+
 * Take advantage of Steam's infinitely customizable controller configuration (bindings) for both the Steam Controller and nearly all other DirectInput/XInput controllers
+
 * Use per-rom/per-emulator/per-game controller configurations that are automatically remembered between gaming sessions (without having to create convoluted Steam shortcuts for every rom)
+
 * Bypass or improve upon many emulators' extremely limited controller bindings and hotkey options
+
 * Share with your Steam friends list your "currently playing" status for whatever rom you launched from LaunchBox/BigBox (Example: YourSteamAlias is currently playing 'Super Metroid (SNES)')
-```
 
 ### Requirements
 
-```
 * .NET Framework 4.6.1+
 * Steam for Windows
 * LaunchBox
-```
 
 ## Getting Started
 
@@ -30,15 +32,13 @@ Here are just a few of the features or benefits provided by using this plugin:
 
 * Download the latest plugin release from GitHub or the LaunchBox forum:
 
-GitHub Releases:
-https://github.com/lahma69/SteamLauncher/releases
+    GitHub Releases: https://github.com/lahma69/SteamLauncher/releases
 
-LaunchBox Plugin Download:
-https://forums.launchbox-app.com/files/file/972-steamlauncher/
+    LaunchBox Plugin Download: https://forums.launchbox-app.com/files/file/972-steamlauncher/
 
 * Extract the 'SteamLauncher' directory from the compressed package into your LaunchBox plugins directory.
 
-Detailed Example: If LaunchBox is located at 'C:\LaunchBox', you would copy the 'SteamLauncher' directory to 'C:\LaunchBox\Plugins'. This would result in 'SteamLauncher.dll' and any additional files being inside the directory 'C:\LaunchBox\Plugins\SteamLauncher'.
+    Detailed Example: If LaunchBox is located at 'C:\LaunchBox', you would copy the 'SteamLauncher' directory to 'C:\LaunchBox\Plugins'. This would result in 'SteamLauncher.dll' and any additional files being inside the directory 'C:\LaunchBox\Plugins\SteamLauncher'.
 
 ### How to Use
 
@@ -48,8 +48,7 @@ To use the plugin to launch your first game through Steam:
 
 * Click the option at the bottom of the menu labeled "Launch via Steam"
 
-Note:
-Currently SteamLauncher will only launch the rom using its default emulator. If you wish to use a different emulator with that particular rom, you will have to go into that rom's settings and change its default emulator, or you can change the default emulator for the entire platform associated with that rom.
+Note: Currently SteamLauncher will only launch the rom using its default emulator. If you wish to use a different emulator with that particular rom, you will have to go into that rom's settings and change its default emulator, or you can change the default emulator for the entire platform associated with that rom.
 
 ### Customize Platform Names
 
@@ -95,25 +94,19 @@ Unfortunately I don't run a dedicated call center to provide technical support..
 
 Note: I will see and respond to messages most quickly by posting a message to the plugin support thread listed below.
 
-[Plugin Support Thread](https://forums.launchbox-app.com/topic/43142-steamlauncher/):
-https://forums.launchbox-app.com/topic/43142-steamlauncher/
+Plugin Support Thread: https://forums.launchbox-app.com/topic/43142-steamlauncher/
 
 ### Contact Information
 
-Alias:
-Lahma
+Alias: Lahma
 
-[Email](mailto:lahma0@gmail.com):
-lahma0@gmail.com
+Email: lahma0@gmail.com
 
-[GitHub Project URL](https://github.com/lahma69/SteamLauncher):
-https://github.com/lahma69/SteamLauncher
+GitHub Project URL: https://github.com/lahma69/SteamLauncher
 
-[LaunchBox Community Forums Profile](https://forums.launchbox-app.com/profile/89710-lahma/):
-https://forums.launchbox-app.com/profile/89710-lahma/
+LaunchBox Community Forums Profile: https://forums.launchbox-app.com/profile/89710-lahma/
 
-[Plugin Support Thread](https://forums.launchbox-app.com/topic/43142-steamlauncher/):
-https://forums.launchbox-app.com/topic/43142-steamlauncher/
+Plugin Support Thread: https://forums.launchbox-app.com/topic/43142-steamlauncher/
 
 ### Known Issues
 
