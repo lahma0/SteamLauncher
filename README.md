@@ -28,32 +28,28 @@ Here are just a few of the features or benefits provided by using this plugin:
 
 ### Installation
 
-To get the plugin up and running with LaunchBox:
-
-```
 * Download the latest plugin release from GitHub or the LaunchBox forum:
 
-[GitHub Releases](https://github.com/lahma69/SteamLauncher/releases):
+GitHub Releases:
 https://github.com/lahma69/SteamLauncher/releases
 
-[LaunchBox Plugin Download](https://forums.launchbox-app.com/files/file/972-steamlauncher/):
+LaunchBox Plugin Download:
 https://forums.launchbox-app.com/files/file/972-steamlauncher/
 
 * Extract the 'SteamLauncher' directory from the compressed package into your LaunchBox plugins directory.
 
 Detailed Example: If LaunchBox is located at 'C:\LaunchBox', you would copy the 'SteamLauncher' directory to 'C:\LaunchBox\Plugins'. This would result in 'SteamLauncher.dll' and any additional files being inside the directory 'C:\LaunchBox\Plugins\SteamLauncher'.
-```
 
 ### How to Use
 
 To use the plugin to launch your first game through Steam:
 
-```
 * Right click any title in LaunchBox or BigBox to bring up its context menu
+
 * Click the option at the bottom of the menu labeled "Launch via Steam"
 
-Note: Currently SteamLauncher will only launch the rom using its default emulator. If you wish to use a different emulator with that particular rom, you will have to go into that rom's settings and change its default emulator, or you can change the default emulator for the entire platform associated with that rom.
-```
+Note:
+Currently SteamLauncher will only launch the rom using its default emulator. If you wish to use a different emulator with that particular rom, you will have to go into that rom's settings and change its default emulator, or you can change the default emulator for the entire platform associated with that rom.
 
 ### Customize Platform Names
 
@@ -66,7 +62,6 @@ Super Mario Bros. (Nintendo Entertainment System)
 
 For whatever reason, you may want to keep the long "official" name of the platform in LaunchBox, but use a shortened, abbreviated, or different platform name inside of Steam. The plugin has this functionality available, and it can be enabled by following these instructions:
 
-```
 * Open the SteamLauncher directory and look for a file named 'config.xml'
 
 * If you do not see the file, you need to launch at least 1 game with the plugin, and then manually close LaunchBox, and the file should then appear in the directory
@@ -82,7 +77,7 @@ For whatever reason, you may want to keep the long "official" name of the platfo
 * After making your changes, simply save the file, close it, and then reopen LaunchBox
 
 * The next time you launch a game, you should see your new custom platform name substituting the real platform name in Steam (an easy place to see the title of the game you're playing is in the Steam overlay)
-```
+
 Just to reiterate, here is an example of what the aforementioned lines look like in my config file:
 
 ```
@@ -128,7 +123,6 @@ There appears to be a significant bug in the Steam Client right now that can cau
 
 To provide help with any technical problems or to investigate a bug, I will need a copy of the debug log that is generated whenever debug logs are enabled in the configuration file. To enable debug logs follow these instructions:
 
-```
 * Locate the file named 'config.xml' in the SteamLauncher directory and open it with a text editor
 
 * Find the line that looks like this: <DebugLogEnabled>false</DebugLogEnabled>
@@ -142,7 +136,6 @@ To provide help with any technical problems or to investigate a bug, I will need
 * Again, look inside the SteamLauncher directory, but this time looks for a file named 'debug.log' (there may be more than one sequentially named log files if there was an enormous amount of output, but this is unlikely if debugging was turned on just briefly)
 
 * Zip up the one or more log files and attach them to your msg, along with the details of your particular setup (Windows version, 32-bit or 64-bit, LaunchBox version, Steam version, SteamLauncher plugin version, etc). The more information the better.
-```
 
 ### Legal Stuff
 
@@ -152,22 +145,16 @@ To provide help with any technical problems or to investigate a bug, I will need
 
 v0.9.0.2 - May 26, 2018
 
-```
 * Added support for PC/Windows games, DOSBox games, and ScummVM games
 
 * Fixed a bug preventing any games with a non-ASCII character in their file name from being launched
 
 * Added a workaround for an annoying issue that causes the Steam UI to steal focus and/or move into the foreground in front of LaunchBox/BigBox after exiting certain games. This workaround can be enabled/disabled by changing the value of 'PreventSteamFocusStealing' in config.xml
-```
 
 v0.9.0.1 - Feb 24, 2018
 
-```
 * Fixed compatibility with the Steam beta (the Feb 14th Steam beta update made the plugin and/or LaunchBox crash)
-```
 
 v0.9.0.0 - Feb 11, 2018
 
-```
 * Initial public release
-```
