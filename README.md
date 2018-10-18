@@ -136,6 +136,20 @@ To provide help with any technical problems or to investigate a bug, I will need
 
 ### Changelog
 
+v0.9.0.5 - Sep 19, 2018
+
+* The last Steam client update added 3 new entries to the IClientShortcuts vftable. Instead of adding them to the end of the table, as one might expect, they inserted them all into the middle of the table in different positions. This altered the static offsets relied upon by the plugin, causing it to stop working. This update fixes those offsets. I am working on a more reliable solution, so that I do not have to rely on easily-broken static offsets. Until I implement these changes however, I will continue to release these small fixes if needed.
+
+v0.9.0.4 Beta - Sep 19, 2018
+
+* Another quick bug-fix release to fix a problem reported by The_Keeper86. Relative 'Start In' paths for LaunchBox games/roms were not being correctly resolved to absolute paths, so this release simply fixes this issue and this issue alone
+
+v0.9.0.3 Beta - Sep 14, 2018
+
+* Some changes to the Steam client API broke the plugin, so this was a quick release to fix those problems
+
+* This release relies mostly on static vftable offsets which makes it less resilient against future Steam updates. I'm looking into implementing new smarter ways to locate vftable offsets, so this is just a temporary fix until I can implement those changes
+
 v0.9.0.2 - May 26, 2018
 
 * Added support for PC/Windows games, DOSBox games, and ScummVM games
