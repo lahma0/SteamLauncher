@@ -16,11 +16,17 @@ namespace SteamLauncher.SteamClient
         // beta Steam offset for 'GetIClientShortcuts'
         private readonly int _betaVtableOffsetGetIClientShortcuts = 53 * IntPtr.Size;
 
-        // non-beta ClientEngine vtable length
-        private const int CLIENTENGINE_VTABLE_LEN = 71;
+        // newest Steam offset for 'GetIClientShortcuts'
+        private readonly int _newVtableOffsetGetIClientShortcuts = 54 * IntPtr.Size;
 
-        // beta ClientEngine vtable length
-        private const int BETA_CLIENTENGINE_VTABLE_LEN = 72;
+        // Oldest Known ClientEngine vtable length
+        private const int OLDER_CLIENTENGINE_VTABLE_LEN = 71;
+
+        // Previous ClientEngine vtable length
+        private const int OLD_CLIENTENGINE_VTABLE_LEN = 72;
+
+        // Most Recent ClientEngine vtable length
+        private const int CLIENT_ENGINE_VTABLE_LEN = 73;
 
         #region Unmanaged Pointers
 
@@ -57,6 +63,7 @@ namespace SteamLauncher.SteamClient
                     }
                 }
 
+                // Initializes ClientShortcuts if needed
                 if (_clientShortcuts == null)
                 {
                     Logger.Info($"Initializing {nameof(ClientShortcuts)}...");
@@ -409,20 +416,21 @@ namespace SteamLauncher.SteamClient
                 return false;
             }
 
-            var vTableOffsetGetIClientShortcuts = _vTableOffsetGetIClientShortcuts;
+            //var vTableOffsetGetIClientShortcuts = _vTableOffsetGetIClientShortcuts;
+            var vTableOffsetGetIClientShortcuts = _betaVtableOffsetGetIClientShortcuts;
 
             // Steam beta update in Feb 2018 added 1 entry to the ClientEngine vtable; this sloppy code checks for a string 
             // always present following the vtable; if the string is found at (lenOfBetaVTable + 1), it uses the beta offset, 
             // otherwise, it behaves normally
-            var postVtableBetaOffset = IntPtr.Size * (BETA_CLIENTENGINE_VTABLE_LEN + 1);
-            var numOfBytesToRead = 4;
-            var postVTableBytes = new byte[numOfBytesToRead];
-            Marshal.Copy(engineInterfaceAddr + postVtableBetaOffset, postVTableBytes, 0, numOfBytesToRead);
-            if (postVTableBytes.SequenceEqual(new byte[] {0x6d, 0x5f, 0x76, 0x65}))
-            {
-                vTableOffsetGetIClientShortcuts = _betaVtableOffsetGetIClientShortcuts;
-                Logger.Warning("Steam beta client detected. Using modified 'GetIClientShortcuts' offset.", 1);
-            }
+            //var postVtableBetaOffset = IntPtr.Size * (OLD_CLIENTENGINE_VTABLE_LEN + 1);
+            //var numOfBytesToRead = 4;
+            //var postVTableBytes = new byte[numOfBytesToRead];
+            //Marshal.Copy(engineInterfaceAddr + postVtableBetaOffset, postVTableBytes, 0, numOfBytesToRead);
+            //if (postVTableBytes.SequenceEqual(new byte[] {0x6d, 0x5f, 0x76, 0x65}))
+            //{
+            //    vTableOffsetGetIClientShortcuts = _betaVtableOffsetGetIClientShortcuts;
+            //    Logger.Warning("Steam beta client detected. Using modified 'GetIClientShortcuts' offset.", 1);
+            //}
 
             var getIClientShortcutsAddr = Marshal.ReadIntPtr(engineInterfaceAddr, vTableOffsetGetIClientShortcuts);
             if (!IsLoaded(getIClientShortcutsAddr))

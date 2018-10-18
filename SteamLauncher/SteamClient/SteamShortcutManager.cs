@@ -241,7 +241,9 @@ namespace SteamLauncher.SteamClient
                 UInt32 appId = ClientShortcuts.GetShortcutAppIdByIndex(sc);
                 if (appId == 0)
                     continue;
-                
+
+                // TODO: The Steam update on 2018-10-13 broke SteamLauncher 0.9.0.4. The call to GetShortcutUserTagCountByAppId is returning a very large invalid number (in most cases it should be 0). I suspect something has changed in the vftable offsets again.
+
                 // Check if the shortcut has the unique SteamLauncher user category tag
                 for (UInt32 tc = 0; tc < ClientShortcuts.GetShortcutUserTagCountByAppId(appId); tc++)
                 {

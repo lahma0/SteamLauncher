@@ -52,7 +52,22 @@ namespace SteamLauncher.Shortcuts
 
         public virtual string LaunchArguments => LaunchBoxGame.CommandLine;
 
-        public string RootFolder => LaunchBoxGame.RootFolder;
+        //public string RootFolder => LaunchBoxGame.RootFolder;
+
+        public string RootFolder
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(LaunchBoxGame.RootFolder))
+                    return Path.GetDirectoryName(LaunchExePath);
+
+                var rootFolder = LaunchBoxGame.RootFolder;
+                if (!Utilities.IsFullPath(rootFolder))
+                    rootFolder = Path.GetFullPath(Path.Combine(Utilities.GetLaunchBoxPath(), rootFolder));
+
+                return rootFolder;
+            }
+        }
 
         public SteamShortcutManager GenerateSteamShortcut()
         {
