@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using SteamLauncher.Tools;
 using Unbroken.LaunchBox.Plugins;
 using Unbroken.LaunchBox.Plugins.Data;
@@ -8,12 +7,23 @@ namespace SteamLauncher.Shortcuts
 {
     public class EmulatorShortcut : GameShortcut
     {
-        public EmulatorShortcut(IGame iGame) : base(iGame)
+        public EmulatorShortcut(IGame iGame, IEmulator iEmulator = null, string overrideRomPath = null) : base(iGame)
         {
-
+            _emulator = iEmulator;
+            OverrideRomPath = overrideRomPath;
         }
 
-        public IEmulator Emulator => PluginHelper.DataManager.GetEmulatorById(LaunchBoxGame.EmulatorId);
+        private readonly IEmulator _emulator;
+        public IEmulator Emulator
+        {
+            get
+            {
+                if (_emulator == null)
+                    return PluginHelper.DataManager.GetEmulatorById(LaunchBoxGame.EmulatorId);
+
+                return _emulator;
+            }
+        }
 
         public IEmulatorPlatform EmulatorPlatform => Emulator.GetAllEmulatorPlatforms().FirstOrDefault(p => p.Platform == PlatformName);
 
@@ -22,24 +32,16 @@ namespace SteamLauncher.Shortcuts
             get
             {
                 var romPath = LaunchBoxGame.ApplicationPath;
-                if (!Utilities.IsFullPath(romPath))
-                    romPath = Path.GetFullPath(Path.Combine(Utilities.GetLaunchBoxPath(), romPath));
+                if (!string.IsNullOrEmpty(OverrideRomPath))
+                    romPath = OverrideRomPath;
 
-                return romPath;
+                return Utilities.GetAbsolutePath(romPath);
             }
         }
 
-        public override string LaunchExePath
-        {
-            get
-            {
-                var exePath = Emulator.ApplicationPath;
-                if (!Utilities.IsFullPath(exePath))
-                    exePath = Path.GetFullPath(Path.Combine(Utilities.GetLaunchBoxPath(), exePath));
+        public string OverrideRomPath { get; }
 
-                return exePath;
-            }
-        }
+        public override string LaunchExePath => Utilities.GetAbsolutePath(Emulator.ApplicationPath);
 
         public override string LaunchArguments
         {

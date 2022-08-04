@@ -24,4 +24,11 @@ namespace SteamLauncher.SteamClient.Native
         [UnmanagedFunctionPointer(CallingConvention.ThisCall, CharSet = CharSet.Ansi)]
         public delegate IntPtr GetIClientShortcuts(IntPtr thisptr, int user, int pipe, string version);
     }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
+    public struct SteamParamStringArray_t
+    {
+        public IntPtr stringArrayPtr;
+        public int numOfStrings;
+    }
 }

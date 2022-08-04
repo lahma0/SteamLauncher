@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "SteamLauncher": {
+      "commandName": "Executable",
+      "executablePath": "R:\\PortableApps\\gaming\\launchers\\LaunchBox\\Core\\LaunchBox.exe",
+      "environmentVariables": {
+        "DOTNET_STARTUP_HOOKS": "R:\\PortableApps\\gaming\\launchers\\LaunchBox\\StartupHook.dll"
+      }
+    }
+  }
+}

@@ -45,7 +45,10 @@ namespace SteamLauncher.Logging
 
         public override void Write(byte[] array, int offset, int count)
         {
-            var actualCount = System.Math.Min(count, array.GetLength(0));
+            if (!this.CanWrite)
+                return;
+
+            var actualCount = Math.Min(count, array.GetLength(0));
             if (Position + actualCount <= MaxFileLength)
             {
                 base.Write(array, offset, count);
@@ -54,7 +57,7 @@ namespace SteamLauncher.Logging
             {
                 if (CanSplitData)
                 {
-                    var partialCount = (int)(System.Math.Max(MaxFileLength, Position) - Position);
+                    var partialCount = (int)(Math.Max(MaxFileLength, Position) - Position);
                     base.Write(array, offset, partialCount);
                     offset += partialCount;
                     count = actualCount - partialCount;
@@ -105,7 +108,7 @@ namespace SteamLauncher.Logging
                     // Delete old files
                     for (var fileCount = 0; fileCount < MaxFileCount; ++fileCount)
                     {
-                        string file = GetBackupFileName(fileCount);
+                        string file = GetBackupFilename(fileCount);
                         if (File.Exists(file))
                             File.Delete(file);
                     }
@@ -115,7 +118,7 @@ namespace SteamLauncher.Logging
                     // Position file pointer to the last backup file
                     for (var fileCount = 0; fileCount < MaxFileCount; ++fileCount)
                     {
-                        if (File.Exists(GetBackupFileName(fileCount)))
+                        if (File.Exists(GetBackupFilename(fileCount)))
                             _nextFileIndex = fileCount + 1;
                     }
 
@@ -130,7 +133,7 @@ namespace SteamLauncher.Logging
         private void BackupAndResetStream()
         {
             Flush();
-            File.Copy(Name, GetBackupFileName(_nextFileIndex), true);
+            File.Copy(Name, GetBackupFilename(_nextFileIndex), true);
             SetLength(0);
 
             ++_nextFileIndex;
@@ -138,7 +141,7 @@ namespace SteamLauncher.Logging
                 _nextFileIndex = 0;
         }
 
-        private string GetBackupFileName(int index)
+        private string GetBackupFilename(int index)
         {
             var formatStringBuilder = new StringBuilder();
             formatStringBuilder.AppendFormat("D{0}", _fileDecimals);

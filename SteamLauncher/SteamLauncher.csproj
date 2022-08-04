@@ -1,91 +1,210 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F48549C8-1784-41F5-9ADA-C95CDE235D34}</ProjectGuid>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SteamLauncher</RootNamespace>
-    <AssemblyName>SteamLauncher</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
+    <PackageProjectUrl>https://forums.launchbox-app.com/files/file/972-steamlauncher/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/lahma0/SteamLauncher</RepositoryUrl>
+    <PackageIcon>Resources\logo1_256.png</PackageIcon>
+    <Authors>Lahma</Authors>
+    <PackageReleaseNotes>v0.9.8.2 (Aug 2, 2022)
+- A Steam update made massive changes to the IClientShortcuts vtable, removing nearly half of its entries (about 30). Thankfully, none of the removed entries were critical to the functionality needed for the shortcut management the plugin performs. 
+- The Steam update also introduced another change which is what prevented me from fixing the plugin by simply updating the online vtables DB. This change alters the way that temporary shortcuts work, making it so that the method previously used to generate shortcut IDs no longer creates the correct value. The more technical explanation is this: Shortcut IDs for non-Steam shortcuts are generated using the shortcut's name and exe path. Now however, temporary shortcut properties no longer actually show the shortcut title, exe path, or any other properties for that matter. The data obviously still exists but it isn't show and therefore Steam calculates the shortcut ID using these blank values causing Steam to always generate the same shortcut ID for all temporary shortcuts (because it is using blank values for the title and exe path). This may just be a bug but it doesn't really matter bc I am now using Steam's API to launch the game using its app ID instead of creating a shortcut using the shortcut ID.
+	    
+v0.9.8.1 (May 24, 2022)
+- Fixed a bug which crashed the plugin if the user did not already have 'config.xml' and 'vtables.xml' files in their SteamLauncher directory.
+- Added a 'Status' filter type to the 'Selective Use' feature.
+
+v0.9.8.0 (May 23, 2022)
+- Overhauled a large portion of the codebase, changing nearly all functionality related to Steam internals into dynamic code that can be updated from an online database. Now, regardless of whether vtable offsets are modified or the number/order/type of parameters are changed, I can fix any broken functionality by simply updating an online definitions database. This should make future updates much quicker and more seamless.
+- Added a much requested feature: the ability to selectively use the plugin based on a list of filters. This new feature can be found in the settings menu under the tab labeled 'Selective Use'. I won't go into a lot of detail here as I believe it is pretty self-explanatory but if you have any questions, just leave a message on the support thread and I would be happy to explain things further.
+
+v0.9.7.8-TempBuild (Sept 23, 2021)
+- A new Steam update affected vtable offsets for entries within IClientShortcuts. In the previous SteamLauncher update, an online updater was implemented to update vtable offsets automatically by checking an online database but unfortunately this only allowed for updating the vtable offset for the function 'GetIClientShortcuts' (and not the actual entries inside of 'IClientShortcuts').
+- Additionally, right before releasing this update, a Steam beta update was released which changed the vtable offset for 'GetIClientShortcuts'; since I was updating the plugin anyways, I went ahead and updated the default offset value for 'GetIClientShortcuts' but this issue could have been entirely handled via the online updater.
+
+v0.9.7.6 (March 31, 2021)
+- Due to major changes in 'steamclient.dll' since the previous release, the previous method for locating certain needed vtable offsets was broken which caused the plugin to stop working for both the beta and non-beta version of Steam. This release adds a new automatic updater for retrieving those vtable offsets from an online DB maintained by the plugin author. This change may only be temporary until a more robust means of dynamically finding these offsets can be developed. It should however mean that the plugin will not be broken by minor vtable changes in future Steam updates.. at least not for very long as the online DB can be updated within a matter of hours after a Steam update is released. All of the new settings can be found under the 'Misc' tab in the settings UI. These include: turning on/off the online automatic updater, manually providing the vtable index for 'GetIClientShortcuts', and manually providing the vtable index for 'GetIClientShortcuts' in the beta version of Steam (sometimes it can differ between the 2 versions).
+
+v0.9.7.5 (Feb 13, 2021)
+- Fixed Bug: When the plugin retrieved the path to a Windows shortcut file (.lnk), if it was enclosed within double quotes, it would be handled incorrectly.
+- Removed Dependency: Removed dependency on IWshRuntimeLibrary which was only used for handling Windows shortcut files (.lnk). Added native implementation.
+    </PackageReleaseNotes>
+    <ApplicationIcon>Resources\logo2_icon.ico</ApplicationIcon>
+    <AssemblyTitle>SteamLauncher Plugin for LaunchBox</AssemblyTitle>
+    <Description>A LaunchBox/BigBox plugin to allow games/roms/emulators to be launched with Steam overlay and controller binding support.</Description>
+    <AssemblyVersion></AssemblyVersion>
+    <FileVersion></FileVersion>
+    <VersionPrefix>0.9.8.2</VersionPrefix>
+    <VersionSuffix></VersionSuffix>
+	<Copyright>Copyright © 2022</Copyright>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <OutputPath>..\..\..\..\..\PortableApps\gaming\launchers\LaunchBox\Plugins\SteamLauncher\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
     <Reference Include="Unbroken.LaunchBox.Plugins">
-      <HintPath>R:\PortableApps\gaming\launchers\LaunchBox\Metadata\Unbroken.LaunchBox.Plugins.dll</HintPath>
+      <HintPath>..\..\..\..\..\PortableApps\gaming\launchers\LaunchBox\Core\Unbroken.LaunchBox.Plugins.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <!--<ItemGroup>
+    <Resource Include="Resources\logo1_256.png" />
+  </ItemGroup>
   <ItemGroup>
-    <Compile Include="Shortcuts\DosBoxShortcut.cs" />
-    <Compile Include="Shortcuts\EmulatorShortcut.cs" />
-    <Compile Include="Shortcuts\GameShortcut.cs" />
-    <Compile Include="Shortcuts\ScummVmShortcut.cs" />
-    <Compile Include="Shortcuts\WindowsShortcut.cs" />
-    <Compile Include="SteamClient\Interop\UTF8StringMarshaler.cs" />
-    <Compile Include="Tools\ActiveWindow.cs" />
-    <Compile Include="Tools\Crc32.cs" />
-    <Compile Include="Logging\FileStreamWithBackup.cs" />
-    <Compile Include="Logging\Logger.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
+    <Resource Include="Resources\logo1_window_16.png" />
+  </ItemGroup>-->
+  <ItemGroup>
+    <Resource Include="Resources\*" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="Microsoft.Management.Infrastructure" Version="2.0.0">
+      <ExcludeAssets>native</ExcludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.19" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+    <PackageReference Include="System.Drawing.Common">
+      <Version>4.7.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Properties\Resources.Designer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
+      <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="LaunchViaSteamMenuItem.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Settings\Config.cs" />
-    <Compile Include="Settings\Platform.cs" />
-    <Compile Include="SteamClient\Attributes\VTableIndex.cs" />
-    <Compile Include="SteamClient\Interfaces\IClientShortcuts.cs" />
-    <Compile Include="SteamClient\Interop\SteamInterfaceWrapper.cs" />
-    <Compile Include="SteamClient\Native\SysNative.cs" />
-    <Compile Include="SteamClient\SteamContext.cs" />
-    <Compile Include="SteamClient\Native\SteamNative.cs" />
-    <Compile Include="SteamClient\SteamProcessInfo.cs" />
-    <Compile Include="SteamClient\SteamShortcutManager.cs" />
-    <Compile Include="Tools\CustomExtensions.cs" />
-    <Compile Include="Tools\UacHelper.cs" />
-    <Compile Include="Tools\Utilities.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
-  <ItemGroup />
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="Resources\Steam.png" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!--<ItemGroup>
+    <None Remove="Resources\logo2_window_256-16.ico" />
+  </ItemGroup>-->
+  <!--<ItemGroup>
+    <None Remove="Resources\logo2_window_32.png" />
+  </ItemGroup>-->
+  <!--<ItemGroup>
+    <None Include="Resources\logo1_256.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>-->
+  <!-- 
+    Usage:
+      To reference a specific WPF theme assembly, set one or more of these properties to true.
+      If no property is set to true, then all theme assemblies are referenced (default). 
+      
+      Setting one property to 'true' implies that other properties are 'false' by default (unless they are 
+      explicitly set to true). 
+      
+       <PropertyGroup>
+          <ReferenceWpfAeroTheme>true</ReferenceWpfAeroTheme>
+          <ReferenceWpfAero2Theme>true</ReferenceWpfAero2Theme>
+          <ReferenceWpfAeroLiteTheme>true</ReferenceWpfAeroLiteTheme>
+          <ReferenceWpfClassicTheme>true</ReferenceWpfClassicTheme>
+          <ReferenceWpfLunaTheme>true</ReferenceWpfLunaTheme>
+          <ReferenceWpfRoyaleTheme>true</ReferenceWpfRoyaleTheme>
+       </PropertyGroup>
+     
+     Advanced Usage:
+      To reference more than one theme assembly at the same time, use an 'alias' 
+        See 'Aliases' in the documentation for [MSBuild Reference element](https://docs.microsoft.com/en-us/visualstudio/msbuild/common-msbuild-project-items?view=vs-2019)
+        and the [C# compiler commandline documentation for -reference](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/reference-compiler-option)
+      
+      This only works in C#. 
+      
+      <PropertyGroup>
+        <WpfAeroThemeAliases>namespace</WpfAeroThemeAliases>
+        <WpfAero2ThemeAliases>namespace</WpfAero2ThemeAliases>
+        <WpfAeroLiteThemeAliases>nameaspace</WpfAeroLiteThemeAliases>
+        <WpfClassicThemeAliases>namespace</WpfClassicThemeAliases>
+        <WpfLunaThemeAliases>namespace</WpfLunaThemeAliases>
+        <WpfRoyaleThemeAliases>namespace</WpfRoyaleThemeAliases>
+      </PropertyGroup>
+  -->
+
+  <Target Name="SelectWpfThemeAssembly" AfterTargets="ResolveAssemblyReferences" Condition="'$(ReferenceWpfAeroTheme)' == 'false' Or '$(ReferenceWpfAero2Theme)' == 'true' Or '$(ReferenceWpfAeroLiteTheme)' == 'false' Or '$(ReferenceWpfClassicTheme)' == 'false' Or '$(ReferenceWpfLunaTheme)' == 'false' Or '$(ReferenceWpfRoyaleTheme)' == 'false'">
+    <ItemGroup>
+      <_WpfThemeAssemblies Include="@(ReferencePath)" Condition="'%(ReferencePath.NuGetPackageId)'=='Microsoft.WindowsDesktop.App.Ref' And '%(ReferencePath.FileName)'=='PresentationFramework.Aero'">
+        <Aliases Condition="'$(WpfAeroThemeAliases)'!=''">$(WpfAeroThemeAliases)</Aliases>
+      </_WpfThemeAssemblies>
+
+      <_WpfThemeAssemblies Include="@(ReferencePath)" Condition="'%(ReferencePath.NuGetPackageId)'=='Microsoft.WindowsDesktop.App.Ref' And '%(ReferencePath.FileName)'=='PresentationFramework.Aero2'">
+        <Aliases Condition="'$(WpfAero2ThemeAliases)'!=''">$(WpfAero2ThemeAliases)</Aliases>
+      </_WpfThemeAssemblies>
+
+      <_WpfThemeAssemblies Include="@(ReferencePath)" Condition="'%(ReferencePath.NuGetPackageId)'=='Microsoft.WindowsDesktop.App.Ref' And '%(ReferencePath.FileName)'=='PresentationFramework.AeroLite'">
+        <Aliases Condition="'$(WpfAeroLiteThemeAliases)'!=''">$(WpfAeroLiteThemeAliases)</Aliases>
+      </_WpfThemeAssemblies>
+
+      <_WpfThemeAssemblies Include="@(ReferencePath)" Condition="'%(ReferencePath.NuGetPackageId)'=='Microsoft.WindowsDesktop.App.Ref' And '%(ReferencePath.FileName)'=='PresentationFramework.Classic'">
+        <Aliases Condition="'$(WpfClassicThemeAliases)'!=''">$(WpfClassicThemeAliases)</Aliases>
+      </_WpfThemeAssemblies>
+
+      <_WpfThemeAssemblies Include="@(ReferencePath)" Condition="'%(ReferencePath.NuGetPackageId)'=='Microsoft.WindowsDesktop.App.Ref' And '%(ReferencePath.FileName)'=='PresentationFramework.Luna'">
+        <Aliases Condition="'$(WpfLunaThemeAliases)'!=''">$(WpfLunaThemeAliases)</Aliases>
+      </_WpfThemeAssemblies>
+
+      <_WpfThemeAssemblies Include="@(ReferencePath)" Condition="'%(ReferencePath.NuGetPackageId)'=='Microsoft.WindowsDesktop.App.Ref' And '%(ReferencePath.FileName)'=='PresentationFramework.Royale'">
+        <Aliases Condition="'$(WpfRoyaleThemeAliases)'!=''">$(WpfRoyaleThemeAliases)</Aliases>
+      </_WpfThemeAssemblies>
+
+      <ReferencePath Remove="@(_WpfThemeAssemblies)" />
+
+      <ReferencePath Include="@(_WpfThemeAssemblies)" Condition="('%(_WpfThemeAssemblies.FileName)'=='PresentationFramework.Aero' And '$(ReferenceWpfAeroTheme)'=='true') Or ('%(_WpfThemeAssemblies.FileName)'=='PresentationFramework.Aero2' And '$(ReferenceWpfAero2Theme)'=='true') Or ('%(_WpfThemeAssemblies.FileName)'=='PresentationFramework.AeroLite' And '$(ReferenceWpfAeroLiteTheme)'=='true') Or ('%(_WpfThemeAssemblies.FileName)'=='PresentationFramework.Classic' And '$(ReferenceWpfClassicTheme)'=='true') Or ('%(_WpfThemeAssemblies.FileName)'=='PresentationFramework.Luna' And '$(ReferenceWpfLunaTheme)'=='true') Or ('%(_WpfThemeAssemblies.FileName)'=='PresentationFramework.Royale' And '$(ReferenceWpfRoyaleTheme)'=='true')" />
+    </ItemGroup>
+  </Target>
+  <!--<Target Name="SelectWpfThemeAssembly" AfterTargets="ResolveAssemblyReferences" Condition="'$(ReferenceWpfAeroTheme)' == 'false'     Or&#xD;&#xA;                     '$(ReferenceWpfAero2Theme)' == 'true'    Or&#xD;&#xA;                     '$(ReferenceWpfAeroLiteTheme)' == 'false' Or&#xD;&#xA;                     '$(ReferenceWpfClassicTheme)' == 'false'  Or &#xD;&#xA;                     '$(ReferenceWpfLunaTheme)' == 'false'     Or&#xD;&#xA;                     '$(ReferenceWpfRoyaleTheme)' == 'false'">
+    <ItemGroup>
+      <_WpfThemeAssemblies Include="@(ReferencePath)" Condition="'%(ReferencePath.NuGetPackageId)'=='Microsoft.WindowsDesktop.App.Ref'  And &#xD;&#xA;                                   '%(ReferencePath.FileName)'=='PresentationFramework.Aero'">
+        <Aliases Condition="'$(WpfAeroThemeAliases)'!=''">$(WpfAeroThemeAliases)</Aliases>
+      </_WpfThemeAssemblies>
+
+      <_WpfThemeAssemblies Include="@(ReferencePath)" Condition="'%(ReferencePath.NuGetPackageId)'=='Microsoft.WindowsDesktop.App.Ref'  And &#xD;&#xA;                                   '%(ReferencePath.FileName)'=='PresentationFramework.Aero2'">
+        <Aliases Condition="'$(WpfAero2ThemeAliases)'!=''">$(WpfAero2ThemeAliases)</Aliases>
+      </_WpfThemeAssemblies>
+
+      <_WpfThemeAssemblies Include="@(ReferencePath)" Condition="'%(ReferencePath.NuGetPackageId)'=='Microsoft.WindowsDesktop.App.Ref'  And &#xD;&#xA;                                   '%(ReferencePath.FileName)'=='PresentationFramework.AeroLite'">
+        <Aliases Condition="'$(WpfAeroLiteThemeAliases)'!=''">$(WpfAeroLiteThemeAliases)</Aliases>
+      </_WpfThemeAssemblies>
+
+      <_WpfThemeAssemblies Include="@(ReferencePath)" Condition="'%(ReferencePath.NuGetPackageId)'=='Microsoft.WindowsDesktop.App.Ref'  And &#xD;&#xA;                                   '%(ReferencePath.FileName)'=='PresentationFramework.Classic'">
+        <Aliases Condition="'$(WpfClassicThemeAliases)'!=''">$(WpfClassicThemeAliases)</Aliases>
+      </_WpfThemeAssemblies>
+
+      <_WpfThemeAssemblies Include="@(ReferencePath)" Condition="'%(ReferencePath.NuGetPackageId)'=='Microsoft.WindowsDesktop.App.Ref'  And &#xD;&#xA;                                   '%(ReferencePath.FileName)'=='PresentationFramework.Luna'">
+        <Aliases Condition="'$(WpfLunaThemeAliases)'!=''">$(WpfLunaThemeAliases)</Aliases>
+      </_WpfThemeAssemblies>
+
+
+      <_WpfThemeAssemblies Include="@(ReferencePath)" Condition="'%(ReferencePath.NuGetPackageId)'=='Microsoft.WindowsDesktop.App.Ref'  And &#xD;&#xA;                                   '%(ReferencePath.FileName)'=='PresentationFramework.Royale'">
+        <Aliases Condition="'$(WpfRoyaleThemeAliases)'!=''">$(WpfRoyaleThemeAliases)</Aliases>
+      </_WpfThemeAssemblies>
+
+
+      <ReferencePath Remove="@(_WpfThemeAssemblies)" />
+
+      <ReferencePath Include="@(_WpfThemeAssemblies)" Condition="('%(_WpfThemeAssemblies.FileName)'=='PresentationFramework.Aero' And '$(ReferenceWpfAeroTheme)'=='true')          Or &#xD;&#xA;                                ('%(_WpfThemeAssemblies.FileName)'=='PresentationFramework.Aero2' And '$(ReferenceWpfAero2Theme)'=='true')        Or &#xD;&#xA;                                ('%(_WpfThemeAssemblies.FileName)'=='PresentationFramework.AeroLite' And '$(ReferenceWpfAeroLiteTheme)'=='true')  Or &#xD;&#xA;                                ('%(_WpfThemeAssemblies.FileName)'=='PresentationFramework.Classic' And '$(ReferenceWpfClassicTheme)'=='true')    Or &#xD;&#xA;                                ('%(_WpfThemeAssemblies.FileName)'=='PresentationFramework.Luna' And '$(ReferenceWpfLunaTheme)'=='true')          Or&#xD;&#xA;                                ('%(_WpfThemeAssemblies.FileName)'=='PresentationFramework.Royale' And '$(ReferenceWpfRoyaleTheme)'=='true')" />
+    </ItemGroup>
+  </Target>-->
 </Project>

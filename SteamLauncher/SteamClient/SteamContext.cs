@@ -1,32 +1,54 @@
-﻿using SteamLauncher.SteamClient.Interfaces;
+﻿using SteamLauncher.DataStore;
+using SteamLauncher.Logging;
+using SteamLauncher.SteamClient.Interfaces;
 using SteamLauncher.SteamClient.Native;
 using System;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using SteamLauncher.Logging;
+using SteamLauncher.DataStore.VTablesStore;
 
 namespace SteamLauncher.SteamClient
 {
-    public sealed class SteamContext
+    public sealed class SteamContext : IDisposable
     {
-        // non-beta Steam offset for 'GetIClientShortcuts'
-        private readonly int _vTableOffsetGetIClientShortcuts = 52 * IntPtr.Size;
+        public string ClientEngineInterfaceName => "IClientEngine";
 
-        // beta Steam offset for 'GetIClientShortcuts'
-        private readonly int _betaVtableOffsetGetIClientShortcuts = 53 * IntPtr.Size;
+        public string ClientShortcutsInterfaceName => "IClientShortcuts";
 
-        // newest Steam offset for 'GetIClientShortcuts'
-        private readonly int _newVtableOffsetGetIClientShortcuts = 54 * IntPtr.Size;
+        public string GetIClientShortcutsName => "GetIClientShortcuts";
 
-        // Oldest Known ClientEngine vtable length
-        private const int OLDER_CLIENTENGINE_VTABLE_LEN = 71;
+        private VTable _clientShortcutsVTable = null;
 
-        // Previous ClientEngine vtable length
-        private const int OLD_CLIENTENGINE_VTABLE_LEN = 72;
+        public VTable ClientShortcutsVTable
+        {
+            get
+            {
+                if (_clientShortcutsVTable != null)
+                {
+                    var currentSteamPid = SteamProcessInfo.GetSteamProcess().Id;
+                    if (currentSteamPid != LastKnownSteamPid)
+                    {
+                        Logger.Info($"Steam interfaces needs to be reinitialized because Steam was closed " +
+                                        $"and/or restarted. Current Steam PID: {currentSteamPid}; Last Known " +
+                                        $"Steam PID: {LastKnownSteamPid}");
+                        ResetInit();
+                    }
+                }
 
-        // Most Recent ClientEngine vtable length
-        private const int CLIENT_ENGINE_VTABLE_LEN = 73;
+                if (_clientShortcutsVTable == null)
+                {
+                    Logger.Info($"Initializing {nameof(ClientShortcutsVTable)}...");
+                    if (!InitClientShortcutsInterface())
+                        return null;
+
+                    _clientShortcutsVTable = Settings.VTables.GetVTable(ClientShortcutsInterfaceName);
+                    LastKnownSteamPid = SteamProcessInfo.GetSteamPid();
+                    Logger.Info($"Setting {nameof(LastKnownSteamPid)}: {LastKnownSteamPid}");
+                }
+
+                return _clientShortcutsVTable;
+            }
+        }
 
         #region Unmanaged Pointers
 
@@ -35,59 +57,7 @@ namespace SteamLauncher.SteamClient
         /// </summary>
         private IntPtr SteamClientDllHandle { get; set; } = IntPtr.Zero;
 
-        /// <summary>
-        /// A pointer to the IClientEngine interface.
-        /// </summary>
-        private IntPtr ClientEngineInterfacePtr { get; set; } = IntPtr.Zero;
-
-        /// <summary>
-        /// A pointer to the IClientShortcuts interface.
-        /// </summary>
-        private IntPtr ClientShortcutsInterfacePtr { get; set; } = IntPtr.Zero;
-
-        private IClientShortcuts _clientShortcuts = null;
-
-        public IClientShortcuts ClientShortcuts
-        {
-            get
-            {
-                // Checks if Steam has been reloaded since the plugin was initialized. If so, sets flag for reinitialization.
-                if (_clientShortcuts != null)
-                {
-                    var currentSteamPid = SteamProcessInfo.SteamProcess.Id;
-                    if (currentSteamPid != LastKnownSteamPid)
-                    {
-                        Logger.Warning("Steam interfaces needs to be reinitialized because Steam was closed and/or restarted. " + 
-                                       $"Current Steam PID: {currentSteamPid}; Last Known Steam PID: {LastKnownSteamPid}");
-                        ResetInit();
-                    }
-                }
-
-                // Initializes ClientShortcuts if needed
-                if (_clientShortcuts == null)
-                {
-                    Logger.Info($"Initializing {nameof(ClientShortcuts)}...");
-                    if (!IsLoaded(ClientShortcutsInterfacePtr) && !InitClientShortcutsInterface())
-                        return null;
-
-                    _clientShortcuts = new IClientShortcuts(ClientShortcutsInterfacePtr);
-                    LastKnownSteamPid = SteamProcessInfo.GetSteamPid();
-                    Logger.Info($"Setting {nameof(LastKnownSteamPid)}: {LastKnownSteamPid}");
-                }
-
-                return _clientShortcuts;
-            }
-        }
-
-        ///// <summary>
-        ///// A pointer to the IClientShortcuts virtual function table.
-        ///// </summary>
-        //private IntPtr ClientShortcutsVTable { get; set; } = IntPtr.Zero;
-
-        //// SteamClient interface is not used for anything right now, so this is not currently needed
-        //private IntPtr SteamClientInterface { get; set; } = IntPtr.Zero;
-
-        #endregion
+        #endregion Unmanaged Pointers
 
         #region Other Properties
 
@@ -97,26 +67,21 @@ namespace SteamLauncher.SteamClient
 
         private int LastKnownSteamPid { get; set; } = 0;
 
-        #endregion
-        
+        #endregion Other Properties
+
         #region Singleton Constructor/Destructor
 
-        private static readonly Lazy<SteamContext> lazy = new Lazy<SteamContext>(() => new SteamContext());
+        private static readonly Lazy<SteamContext> Lazy = new Lazy<SteamContext>(() => new SteamContext());
 
-        public static SteamContext Instance => lazy.Value;
+        public static SteamContext Instance => Lazy.Value;
 
         private SteamContext()
         {
             Logger.Info($"Instantiating {nameof(SteamContext)} singleton...");
+            //InitClientShortcutsInterface();
         }
 
-        ~SteamContext()
-        {
-            Logger.Info($"Executing {nameof(SteamContext)} destructor...");
-            ReleaseIpc();
-        }
-
-        #endregion
+        #endregion Singleton Constructor/Destructor
 
         #region Delegate Implementations
 
@@ -210,26 +175,7 @@ namespace SteamLauncher.SteamClient
             _callReleaseUser(pipe, user);
         }
 
-        /// <summary>
-        /// An instance of the <see cref="SteamNative.GetIClientShortcuts"/> delegate.
-        /// </summary>
-        private SteamNative.GetIClientShortcuts _callGetIClientShortcuts;
-
-        /// <summary>
-        /// Retrieves an unmanaged pointer to the 'GetIClientShortcuts' method inside of the ClientEngine virtual function table.
-        /// </summary>
-        /// <param name="user">An int defining a connection to an existing global Steam user.</param>
-        /// <param name="pipe">The Steam communication pipe acquired by calling <see cref="CreateSteamPipe"/>.</param>
-        /// <returns>An unmanaged ptr to ClientEngine interface method 'GetIClientShortcuts', or 0 upon failure.</returns>
-        private IntPtr GetIClientShortcuts(int user, int pipe)
-        {
-            if (_callGetIClientShortcuts == null || ClientEngineInterfacePtr == IntPtr.Zero)
-                throw new InvalidOperationException($"Steam Client library is not initialized ({nameof(GetIClientShortcuts)})");
-
-            return _callGetIClientShortcuts(ClientEngineInterfacePtr, user, pipe, "CLIENTSHORTCUTS_INTERFACE_VERSION001");
-        }
-
-        #endregion
+        #endregion Delegate Implementations
 
         #region Utility Functions
 
@@ -254,14 +200,12 @@ namespace SteamLauncher.SteamClient
         /// <returns>true if the provided value is within the valid range for Steam communication pipe values; otherwise, returns false.</returns>
         private bool IsValidPipe(int pipe) => (pipe != 0);
 
-        private void ResetInit()
+        public void ResetInit()
         {
             SteamClientDllHandle = IntPtr.Zero;
-            ClientEngineInterfacePtr = IntPtr.Zero;
-            ClientShortcutsInterfacePtr = IntPtr.Zero;
-            _clientShortcuts = null;
-            //ClientShortcutsVTable = IntPtr.Zero;
-            //SteamClientInterface = IntPtr.Zero;
+            Settings.VTables?.GetVTable(ClientEngineInterfaceName)?.Detach();
+            Settings.VTables?.GetVTable(ClientShortcutsInterfaceName)?.Detach();
+            _clientShortcutsVTable = null;
 
             _callCreateInterface = null;
             _callCreateSteamPipe = null;
@@ -273,13 +217,14 @@ namespace SteamLauncher.SteamClient
             Pipe = 0;
         }
 
-        #endregion
+        #endregion Utility Functions
 
         #region Steam Client Library Initialization
 
         private bool InitSteam()
         {
-            if (SteamProcessInfo.SteamProcess == null)
+            SteamProcessInfo.GetSteamProcessAsync().GetAwaiter().GetResult();
+            if (SteamProcessInfo.GetSteamProcess() == null)
             {
                 Logger.Error("The Steam process could not be located or started. Aborting Steam initialization.");
                 return false;
@@ -297,68 +242,73 @@ namespace SteamLauncher.SteamClient
             var clientDllHandle = SysNative.LoadLibraryEx(SteamProcessInfo.SteamClientDllPath, IntPtr.Zero, SysNative.LOAD_WITH_ALTERED_SEARCH_PATH);
             if (!IsLoaded(clientDllHandle))
             {
-                Logger.Error("Failed to load the Steam Client DLL. Aborting initialization.", 1);
+                Logger.Error("Failed to load the Steam Client DLL. Aborting initialization.");
                 return false;
             }
 
             _callCreateInterface = SysNative.GetExportFunction<SteamNative.CreateInterface>(clientDllHandle, "CreateInterface");
             if (_callCreateInterface == null)
             {
-                Logger.Error("Failed to retrieve the 'CreateInterface' export function. Aborting initialization.", 1);
+                Logger.Error("Failed to retrieve the 'CreateInterface' export function. Aborting initialization.");
                 return false;
             }
 
             _callCreateSteamPipe = SysNative.GetExportFunction<SteamNative.CreateSteamPipe>(clientDllHandle, "Steam_CreateSteamPipe");
             if (_callCreateSteamPipe == null)
             {
-                Logger.Error("Failed to retrieve the 'Steam_CreateSteamPipe' export function. Aborting initialization.", 1);
+                Logger.Error("Failed to retrieve the 'Steam_CreateSteamPipe' export function. Aborting initialization.");
                 return false;
             }
 
             _callBReleaseSteamPipe = SysNative.GetExportFunction<SteamNative.BReleaseSteamPipe>(clientDllHandle, "Steam_BReleaseSteamPipe");
             if (_callBReleaseSteamPipe == null)
             {
-                Logger.Error("Failed to retrieve the 'Steam_BReleaseSteamPipe' export function. Aborting initialization.", 1);
+                Logger.Error("Failed to retrieve the 'Steam_BReleaseSteamPipe' export function. Aborting initialization.");
                 return false;
             }
 
             _callConnectToGlobalUser = SysNative.GetExportFunction<SteamNative.ConnectToGlobalUser>(clientDllHandle, "Steam_ConnectToGlobalUser");
             if (_callConnectToGlobalUser == null)
             {
-                Logger.Error("Failed to retrieve the 'Steam_ConnectToGlobalUser' export function. Aborting initialization.", 1);
+                Logger.Error("Failed to retrieve the 'Steam_ConnectToGlobalUser' export function. Aborting initialization.");
                 return false;
             }
 
             _callReleaseUser = SysNative.GetExportFunction<SteamNative.ReleaseUser>(clientDllHandle, "Steam_ReleaseUser");
             if (_callReleaseUser == null)
             {
-                Logger.Error("Failed to retrieve the 'Steam_ReleaseUser' export function. Aborting initialization.", 1);
+                Logger.Error("Failed to retrieve the 'Steam_ReleaseUser' export function. Aborting initialization.");
                 return false;
             }
 
             Pipe = CreateSteamPipe();
             if (!IsValidPipe(Pipe))
             {
-                Logger.Error("Failed to create a Steam pipe (IPC). Aborting initialization.", 1);
+                Logger.Error("Failed to create a Steam pipe (IPC). Aborting initialization.");
                 return false;
             }
 
             User = ConnectToGlobalUser(Pipe);
             if (!IsValidUser(User))
             {
-                Logger.Error("Failed to connect to Steam global user (IPC). Aborting initialization.", 1);
+                Logger.Error("Failed to connect to Steam global user (IPC). Aborting initialization.");
                 return false;
             }
 
             SteamClientDllHandle = clientDllHandle;
-            Logger.Info("Steam initialization succeeded!", 1);
+            Logger.Info("Steam initialization succeeded!");
 
             return true;
         }
 
+        /// <summary>
+        /// Initializes 'IClientEngine' interface.
+        /// </summary>
+        /// <returns></returns>
         private bool InitClientEngineInterface()
         {
-            if (IsLoaded(ClientEngineInterfacePtr))
+            //if (IsLoaded(ClientEngineInterfacePtr))
+            if (Settings.VTables.GetVTable(ClientEngineInterfaceName).IsAttached)
             {
                 Logger.Info("ClientEngine is already initialized.");
                 return true;
@@ -369,36 +319,36 @@ namespace SteamLauncher.SteamClient
 
             Logger.Info("Beginning initialization of the ClientEngine interface...");
 
-            // Loop tries to be resilient against IClientEngine version # increases in future Steam updates
-            // When the version # last changed, this CreateInterface call failed; a simple loop like this would have prevented that
-            for (var i = 5; i < 9; i++)
+            var engineInterfacePtr = IntPtr.Zero;
+            try
             {
-                var engineInterfacePtr = IntPtr.Zero;
-                var engineVersion = $"CLIENTENGINE_INTERFACE_VERSION{i:D3}";
-                try
-                {
-                    engineInterfacePtr = CreateInterface(engineVersion, IntPtr.Zero);
-                }
-                catch
-                {
-                    // suppress exception (invalid ClientEngine interface version)
-                }
+                engineInterfacePtr = CreateInterface(
+                    Settings.VTables.GetVTable(ClientEngineInterfaceName).InterfaceVersion,
+                    IntPtr.Zero);
+            }
+            catch
+            {
+                // suppress exception
+            }
 
-                if (!IsLoaded(engineInterfacePtr)) continue;
-
-                Logger.Info($"ClientEngine initialization succeded! ({engineVersion})", 1);
-                ClientEngineInterfacePtr = engineInterfacePtr;
-
+            if (IsLoaded(engineInterfacePtr))
+            {
+                Logger.Info("ClientEngine initialization succeeded!");
+                Settings.VTables.GetVTable(ClientEngineInterfaceName).Attach(engineInterfacePtr);
                 return true;
             }
 
-            Logger.Error("Failed to create the ClientEngine interface. Aborting initialization.", 1);
+            Logger.Error("Failed to create the ClientEngine interface. Aborting initialization.");
             return false;
         }
 
+        /// <summary>
+        /// Initializes 'IClientShortcuts' interface.
+        /// </summary>
+        /// <returns>If successful, true; otherwise, false.</returns>
         private bool InitClientShortcutsInterface()
         {
-            if (IsLoaded(ClientShortcutsInterfacePtr))
+            if (Settings.VTables.GetVTable(ClientShortcutsInterfaceName).IsAttached)
             {
                 Logger.Info("ClientShortcuts is already initialized.");
                 return true;
@@ -409,80 +359,92 @@ namespace SteamLauncher.SteamClient
 
             Logger.Info("Beginning initialization of the ClientShortcuts interface...");
 
-            var engineInterfaceAddr = Marshal.ReadIntPtr(ClientEngineInterfacePtr);
-            if (!IsLoaded(engineInterfaceAddr))
+            var clientShortcutsInterfacePtr = GetShortcutsInterfacePtr(
+                Settings.VTables.GetVTable(ClientEngineInterfaceName).VTablePtr);
+
+            if (!IsLoaded(clientShortcutsInterfacePtr))
             {
-                Logger.Error("Failed to retrieve a valid ClientEngine interface address. Aborting initialization.", 1);
+                Logger.Error("Failed to retrieve a valid ClientShortcuts interface address. " +
+                                "Aborting initialization.");
                 return false;
             }
 
-            //var vTableOffsetGetIClientShortcuts = _vTableOffsetGetIClientShortcuts;
-            var vTableOffsetGetIClientShortcuts = _betaVtableOffsetGetIClientShortcuts;
-
-            // Steam beta update in Feb 2018 added 1 entry to the ClientEngine vtable; this sloppy code checks for a string 
-            // always present following the vtable; if the string is found at (lenOfBetaVTable + 1), it uses the beta offset, 
-            // otherwise, it behaves normally
-            //var postVtableBetaOffset = IntPtr.Size * (OLD_CLIENTENGINE_VTABLE_LEN + 1);
-            //var numOfBytesToRead = 4;
-            //var postVTableBytes = new byte[numOfBytesToRead];
-            //Marshal.Copy(engineInterfaceAddr + postVtableBetaOffset, postVTableBytes, 0, numOfBytesToRead);
-            //if (postVTableBytes.SequenceEqual(new byte[] {0x6d, 0x5f, 0x76, 0x65}))
-            //{
-            //    vTableOffsetGetIClientShortcuts = _betaVtableOffsetGetIClientShortcuts;
-            //    Logger.Warning("Steam beta client detected. Using modified 'GetIClientShortcuts' offset.", 1);
-            //}
-
-            var getIClientShortcutsAddr = Marshal.ReadIntPtr(engineInterfaceAddr, vTableOffsetGetIClientShortcuts);
-            if (!IsLoaded(getIClientShortcutsAddr))
+            try
             {
-                Logger.Error("Failed to retrieve a valid ClientShortcuts interface address. Aborting initialization.", 1);
+                Settings.VTables.GetVTable(ClientShortcutsInterfaceName).Attach(clientShortcutsInterfacePtr);
+            }
+            catch
+            {
+                Logger.Error("Failed to initialize ClientShortcuts interface!");
                 return false;
             }
 
-            _callGetIClientShortcuts = Marshal.GetDelegateForFunctionPointer<SteamNative.GetIClientShortcuts>(getIClientShortcutsAddr);
-            if (_callGetIClientShortcuts == null)
-            {
-                Logger.Error("Failed to retrieve a valid delegate for the GetIClientShortcuts function pointer. Aborting initialization.", 1);
-                return false;
-            }
-
-            var shortcutsInterfacePtr = GetIClientShortcuts(User, Pipe);
-            if (!IsLoaded(shortcutsInterfacePtr))
-            {
-                Logger.Error("The call to the native function GetIClientShortcuts failed. Aborting initialization.", 1);
-                return false;
-            }
-
-            ClientShortcutsInterfacePtr = shortcutsInterfacePtr;
-
-            Logger.Info("ClientShortcuts initialization succeeded!", 1);
-
+            Logger.Info("ClientShortcuts initialization succeeded!");
             return true;
         }
 
-        #endregion
-        
-        #region Unused/Unneeded Stuff
 
-        //// SteamClient interface is not used for anything right now, so this is not currently needed
-        //private bool InitISteamClient()
-        //{
-        //    if (!InitSteam())
-        //        return false;
+        /// <summary>
+        /// Uses the vtable index stored in VTablesInfo to retrieve a ptr to the 'GetIClientShortcuts' vtable entry in
+        /// the 'IClientEngine' vtable.
+        /// </summary>
+        /// <param name="clientEngineVtablePtr">The address of the IClientEngine vtable.</param>
+        /// <returns>If found, a pointer to the IClientShortcuts interface; otherwise, IntPtr.Zero.</returns>
+        private IntPtr GetShortcutsInterfacePtr(IntPtr clientEngineVtablePtr)
+        {
+            try
+            {
+                var clientShortcutsInterfacePtr = (IntPtr)Settings.VTables.
+                    GetVtEntry(ClientEngineInterfaceName, GetIClientShortcutsName).
+                    Invoke(User, Pipe, Settings.VTables.GetVTable(ClientShortcutsInterfaceName).InterfaceVersion);
 
-        //    if (IsLoaded(SteamClientInterface))
-        //        return true;
+                return clientShortcutsInterfacePtr;
+            }
+            catch
+            {
+                // suppress exception
+            }
 
-        //    SteamClientInterface = CreateInterface("SteamClient017", IntPtr.Zero);
-        //    if (!IsLoaded(SteamClientInterface))
-        //        return false;
+            Logger.Error($"Failed to retrieve a valid pointer to {GetIClientShortcutsName}.");
+            return IntPtr.Zero;
+        }
 
-        //    return true;
-        //}
+        #endregion Steam Client Library Initialization
 
-        #endregion
-        
         #region Cleanup
+
+        private bool _disposed = false;
+
+        ~SteamContext()
+        {
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+
+                }
+
+                Logger.Info($"Disposing {nameof(SteamContext)} unmanaged resources.");
+                ReleaseIpc();
+                ResetInit();
+                _disposed = true;
+            }
+            else
+            {
+
+            }
+        }
 
         private void ReleaseIpc()
         {
@@ -498,6 +460,6 @@ namespace SteamLauncher.SteamClient
             Pipe = User = 0;
         }
 
-        #endregion
+        #endregion Cleanup
     }
 }

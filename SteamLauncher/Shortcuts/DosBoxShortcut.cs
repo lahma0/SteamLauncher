@@ -1,4 +1,4 @@
-﻿using System.IO;
+﻿using SteamLauncher.DataStore;
 using SteamLauncher.Tools;
 using Unbroken.LaunchBox.Plugins.Data;
 
@@ -11,23 +11,13 @@ namespace SteamLauncher.Shortcuts
             Mounts = iGame.GetAllMounts();
         }
 
-        public IMount[] Mounts { get; private set; }
+        public IMount[] Mounts { get; }
 
-        public override string LaunchExePath => Path.Combine(Utilities.GetLaunchBoxPath(), "DOSBox\\DOSBox.exe");
+        public override string LaunchExePath => Utilities.GetAbsolutePath(Settings.Config.DosBoxExePath);
 
         public string DosBoxConfigPath => LaunchBoxGame.DosBoxConfigurationPath;
 
-        public string DosBoxGamePath
-        {
-            get
-            {
-                var gamePath = LaunchBoxGame.ApplicationPath;
-                if (!Utilities.IsFullPath(gamePath))
-                    gamePath = Path.GetFullPath(Path.Combine(Utilities.GetLaunchBoxPath(), gamePath));
-
-                return gamePath;
-            }
-        }
+        public string DosBoxGamePath => Utilities.GetAbsolutePath(LaunchBoxGame.ApplicationPath);
 
         public override string LaunchArguments
         {

@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>SteamLauncherProxy_NetCore</RootNamespace>
+    <UseWPF>true</UseWPF>
+    <PackageProjectUrl>https://forums.launchbox-app.com/files/file/972-steamlauncher/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/lahma0/SteamLauncher</RepositoryUrl>
+    <Authors>Lahma</Authors>
+    <ApplicationIcon>Resources\logo2_icon.ico</ApplicationIcon>
+    <Version>1.0.1</Version>
+    <Company>Open Source US</Company>
+    <Description>Proxy exe (.NET Core version) used in conjunction with the LaunchBox/BigBox plugin SteamLauncher.</Description>
+    <Copyright>Copyright ©  2020</Copyright>
+    <PackageIcon>Resources\logo2_icon.ico</PackageIcon>
+    <AssemblyName>SteamLauncherProxy</AssemblyName>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\*" />
+  </ItemGroup>
+
+</Project>

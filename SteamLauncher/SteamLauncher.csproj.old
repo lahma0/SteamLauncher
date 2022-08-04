@@ -1,0 +1,172 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F48549C8-1784-41F5-9ADA-C95CDE235D34}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SteamLauncher</RootNamespace>
+    <AssemblyName>SteamLauncher</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\..\..\..\PortableApps\gaming\launchers\LaunchBox\Plugins\SteamLauncher\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="PresentationFramework.Aero2" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Unbroken.LaunchBox.Plugins">
+      <HintPath>..\..\..\..\..\PortableApps\gaming\launchers\LaunchBox\Core\Unbroken.LaunchBox.Plugins.dll</HintPath>
+    </Reference>
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ActivityState.cs" />
+    <Compile Include="UI\Converters\BoolToForegroundConverter.cs" />
+    <Compile Include="UI\Converters\SwitchBindingExtension.cs" />
+    <Compile Include="UI\Framework\CommandHandler.cs" />
+    <Compile Include="UI\Converters\EnumHelper.cs" />
+    <Compile Include="UI\Converters\EnumToCollectionConverter.cs" />
+    <Compile Include="UI\Converters\PropertyToDescriptionConverter.cs" />
+    <Compile Include="UI\Framework\DialogHelper.cs" />
+    <Compile Include="UI\Framework\DialogWindow.cs" />
+    <Compile Include="UI\Framework\ICloseable.cs" />
+    <Compile Include="UI\Framework\IDialog.cs" />
+    <Compile Include="UI\ViewModels\SettingsViewModel.cs" />
+    <Compile Include="UI\Views\SettingsWindow.xaml.cs">
+      <DependentUpon>SettingsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Converters\SliderCaptionConverter.cs" />
+    <Compile Include="UI\Framework\ViewModelFramework.cs" />
+    <Compile Include="UI\Themes\ColorfulDarkTheme.xaml.cs">
+      <DependentUpon>ColorfulDarkTheme.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GameLaunchingPlugin.cs" />
+    <Compile Include="Logging\LoggerFilter.cs" />
+    <Compile Include="ProcWatch\ProcessWatcher.cs" />
+    <Compile Include="ProcWatch\ProcessWatcherEventArgs.cs" />
+    <Compile Include="Proxy\ProxyEmulator.cs" />
+    <Compile Include="SettingsSystemMenuItem.cs" />
+    <Compile Include="Settings\LauncherToExe.cs" />
+    <Compile Include="Settings\State.cs" />
+    <Compile Include="Settings\RepairPath.cs" />
+    <Compile Include="Shortcuts\DosBoxShortcut.cs" />
+    <Compile Include="Shortcuts\EmulatorShortcut.cs" />
+    <Compile Include="Shortcuts\GameShortcut.cs" />
+    <Compile Include="Shortcuts\ScummVmShortcut.cs" />
+    <Compile Include="Shortcuts\WindowsShortcut.cs" />
+    <Compile Include="SteamClient\Interop\SteamParamStringArray.cs" />
+    <Compile Include="SteamClient\Interop\Utf8String.cs" />
+    <Compile Include="SteamClient\Interop\Utf8StringMarshaler.cs" />
+    <Compile Include="Tools\CloneObjectExtensions.cs" />
+    <Compile Include="Tools\Range.cs" />
+    <Compile Include="UseSteamLauncherSystemMenuItem.cs" />
+    <Compile Include="SteamClient\ShortcutsVdf.cs" />
+    <Compile Include="Tools\ActiveWindow.cs" />
+    <Compile Include="Tools\ByteArrayUtils.cs" />
+    <Compile Include="Tools\Crc32.cs" />
+    <Compile Include="Logging\FileStreamWithBackup.cs" />
+    <Compile Include="Logging\Logger.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="LaunchViaSteamMenuItem.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings\Config.cs" />
+    <Compile Include="Settings\Platform.cs" />
+    <Compile Include="SteamClient\Attributes\VTableIndex.cs" />
+    <Compile Include="SteamClient\Interfaces\IClientShortcuts.cs" />
+    <Compile Include="SteamClient\Interop\SteamInterfaceWrapper.cs" />
+    <Compile Include="SteamClient\Native\SysNative.cs" />
+    <Compile Include="SteamClient\SteamContext.cs" />
+    <Compile Include="SteamClient\Native\SteamNative.cs" />
+    <Compile Include="SteamClient\SteamProcessInfo.cs" />
+    <Compile Include="SteamClient\SteamShortcutManager.cs" />
+    <Compile Include="Tools\CustomExtensions.cs" />
+    <Compile Include="Tools\Info.cs" />
+    <Compile Include="Tools\PathUtilities.DISABLED.cs" />
+    <Compile Include="Tools\ProcessExtension.cs" />
+    <Compile Include="Tools\ProcessMonitor.cs" />
+    <Compile Include="Tools\ReflectionHelper.cs" />
+    <Compile Include="Tools\WindowMgmt.cs" />
+    <Compile Include="Tools\UacHelper.cs" />
+    <Compile Include="Tools\Utilities.cs" />
+    <Compile Include="Tools\WindowsLnkFile.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="IWshRuntimeLibrary">
+      <Guid>{F935DC20-1CF0-11D0-ADB9-00C04FD58A0B}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="UI\Views\SettingsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\Themes\ColorfulDarkTheme.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\logo1_256.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\logo1_window_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common">
+      <Version>4.7.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

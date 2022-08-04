@@ -8,24 +8,14 @@ namespace SteamLauncher.Shortcuts
     {
         public ScummVmShortcut(IGame iGame) : base(iGame)
         {
-
+            
         }
 
-        public string ScummVmGameDataPath
-        {
-            get
-            {
-                var gameDataPath = LaunchBoxGame.ScummVmGameDataFolderPath;
-                if (!Utilities.IsFullPath(gameDataPath))
-                    gameDataPath = Path.GetFullPath(Path.Combine(Utilities.GetLaunchBoxPath(), gameDataPath));
-
-                return gameDataPath;
-            }
-        }
+        public string ScummVmGameDataPath => Utilities.GetAbsolutePath(LaunchBoxGame.ScummVmGameDataFolderPath);
 
         public string ScummVmGameType => LaunchBoxGame.ScummVmGameType;
 
-        public override string LaunchExePath => Path.Combine(Utilities.GetLaunchBoxPath(), "ScummVM\\scummvm.exe");
+        public override string LaunchExePath => Path.Combine(Info.LaunchBoxDir, "ThirdParty\\ScummVM\\scummvm.exe");
 
         public override string LaunchArguments
         {

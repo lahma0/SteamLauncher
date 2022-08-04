@@ -1,180 +1,234 @@
 using System;
 using System.Drawing;
-using System.IO;
 using SteamLauncher.Logging;
-using SteamLauncher.Settings;
+using SteamLauncher.DataStore;
 using SteamLauncher.Shortcuts;
 using SteamLauncher.SteamClient;
-using SteamLauncher.SteamClient.Native;
 using SteamLauncher.Tools;
 using Unbroken.LaunchBox.Plugins;
 using Unbroken.LaunchBox.Plugins.Data;
 
 namespace SteamLauncher
 {
-    /// <summary>
-    /// Shows the 'Launch via Steam' custom menu item inside LaunchBox's game context menus.
-    /// </summary>
-    public class LaunchViaSteamMenuItem : IGameMenuItemPlugin
-    {
-        /// <summary>
-        /// Contains DateTime When LaunchBox process was last brought into foreground
-        /// </summary>
-        private DateTime _lastTimeLbInForeground;
+    ///// <summary>
+    ///// Shows the 'Launch via Steam' custom menu item inside LaunchBox's game context menus.
+    ///// </summary>
+    //public class LaunchViaSteamMenuItem : IGameMenuItemPlugin
+    //{
+    //    /// <summary>
+    //    /// Contains DateTime When LaunchBox process was last brought into foreground
+    //    /// </summary>
+    //    private DateTime _lastTimeLbInForeground = DateTime.Now;
 
-        private readonly ActiveWindow _activeWindow;
+    //    private IntPtr _lastForegroundWindowHandle = IntPtr.Zero;
 
-        public LaunchViaSteamMenuItem()
-        {
-            var defaultConfigLoaded = false;
+    //    private readonly ActiveWindow _activeWindow;
 
-            try
-            {
-                // Try to load the plugin's configuration file
-                Config.Load();
-            }
-            catch (FileNotFoundException ex)
-            {
-                // Load default values if no configuration file is found
-                Config.Default();
-                defaultConfigLoaded = true;
-            }
+    //    public bool IsWindowHookEnabled { get; private set; }
 
-            // Enable debug logging if enabled in the config
-            if (Config.Instance.DebugLogEnabled)
-            {
-                try
-                {
-                    Logger.EnableDebugLog(Config.LOG_PATH);
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error("An error occurred while attempting to enable debug logging to file. " + 
-                                 $"Debug messages will only be output to console. Exception: {ex.Message}");
-                }
-                
-            }
+    //    public LaunchViaSteamMenuItem()
+    //    {
+    //        Logger.Info($"{nameof(LaunchViaSteamMenuItem)} loaded.");
+
+    //        SLInit.Init();
+
+    //        //var steamLauncherPath = Info.SteamLauncherPath;
+    //        //Logger.Info($"SteamLauncher v{Info.GetSteamLauncherVersion()} loaded " + 
+    //        //            $"({(SysNative.Is64Bit() ? "64-bit" : "32-bit")} mode) from '{steamLauncherPath}'.");
+
+    //        //if (!steamLauncherPath.ToLower().EndsWith(@"launchbox\plugins\steamlauncher\steamlauncher.dll"))
+    //        //{
+    //        //    Logger.Warning($"It appears that SteamLauncher may be executing from an unexpected location which " + 
+    //        //                   "could indicate that multiple copies of the plugin are present within the LaunchBox " +
+    //        //                   "directory structure. LaunchBox will load the plugin, regardless of its name (as " + 
+    //        //                   "long as it has a .dll extension), if it is ANYWHERE within the LaunchBox " + 
+    //        //                   "directory structure, including its root directory or ANY subdirectories. Be " + 
+    //        //                   "sure that the only instance of the plugin is located at " + 
+    //        //                   "'LaunchBox\\Plugins\\SteamLauncher\\SteamLauncher.dll' and then restart " + 
+    //        //                   "LaunchBox. Unexpected behavior will likely occur until this is resolved.");
+    //        //}
+
+    //        _activeWindow = ActiveWindow.Instance;
+    //    }
+
+    //    ~LaunchViaSteamMenuItem()
+    //    {
             
-            if (defaultConfigLoaded)
-                Logger.Warning($"The configuration file '{Config.CONFIG_FILENAME}' could not be found. Loading defaults.");
-            
-            Logger.Info($"SteamLauncher plugin loaded ({(SysNative.Is64Bit() ? "64-bit" : "32-bit")} mode).");
+    //    }
 
-            _activeWindow = new ActiveWindow();
-        }
+    //    private void EnableActiveWindowHook()
+    //    {
+    //        if (IsWindowHookEnabled)
+    //            return;
 
-        ~LaunchViaSteamMenuItem()
-        {
-            Config.Instance.Save();
-        }
+    //        Logger.Info($"{nameof(LaunchViaSteamMenuItem)} is subscribing to {nameof(ActiveWindow.ActiveWindowChanged)}.");
+    //        _activeWindow.ActiveWindowChanged += OnActiveWindowChanged;
+    //        IsWindowHookEnabled = true;
+    //    }
 
-        private void EnableActiveWindowHook()
-        {
-            Logger.Info("Enabling ActiveWindow hook.");
-            _activeWindow.EnableHook();
-            _activeWindow.ActiveWindowChanged += OnActiveWindowChanged;
-        }
+    //    private void DisableActiveWindowHook()
+    //    {
+    //        if (!IsWindowHookEnabled)
+    //            return;
 
-        private void DisableActiveWindowHook()
-        {
-            Logger.Info("Disabling ActiveWindow hook.");
-            _activeWindow.DisableHook();
-            _activeWindow.ActiveWindowChanged -= OnActiveWindowChanged;
-        }
+    //        Logger.Info($"{nameof(LaunchViaSteamMenuItem)} is unsubscribing from {nameof(ActiveWindow.ActiveWindowChanged)}.");
+    //        _activeWindow.ActiveWindowChanged -= OnActiveWindowChanged;
+    //        IsWindowHookEnabled = false;
+    //    }
 
-        /// <summary>
-        /// Event handler that monitors Windows foreground window changes in order to prevent the annoying problem of 
-        /// Steam stealing focus from LB after some games exit (at which time LB/BB should be the active Window). 
-        /// This is only enabled if the 'PreventSteamFocusStealing' setting is enabled. 
-        /// </summary>
-        /// <param name="sender">The object who issued the event.</param>
-        /// <param name="windowHeader">The title of the newly activated window.</param>
-        /// <param name="hwnd">The handle of the newly activated window.</param>
-        private void OnActiveWindowChanged(object sender, string windowHeader, IntPtr hwnd)
-        {
-            if (hwnd == Utilities.GetLaunchBoxProcess().MainWindowHandle)
-            {
-                _lastTimeLbInForeground = DateTime.Now;
-                return;
-            }
+    //    /// <summary>
+    //    /// Event handler that monitors Windows foreground window changes in order to prevent the annoying problem of 
+    //    /// Steam stealing focus from LB after some games exit (at which time LB/BB should be the active Window). 
+    //    /// This is only enabled if the 'PreventSteamFocusStealing' setting is enabled. 
+    //    /// </summary>
+    //    /// <param name="sender">The object who issued the event.</param>
+    //    /// <param name="windowHeader">The title of the newly activated window.</param>
+    //    /// <param name="hwnd">The handle of the newly activated window.</param>
+    //    private void OnActiveWindowChanged(object sender, string windowHeader, IntPtr hwnd)
+    //    {
+    //        var lbMainWindowHandle = Info.LaunchBoxProcess.MainWindowHandle;
 
-            if (hwnd == SteamProcessInfo.SteamProcess.MainWindowHandle)
-            {
-                var timeSinceLbGotFocus = DateTime.Now.Subtract(_lastTimeLbInForeground);
-                if (timeSinceLbGotFocus >= TimeSpan.FromSeconds(Config.Instance.TotalSecondsToPreventSteamFocus))
-                    return;
+    //        if (hwnd == lbMainWindowHandle)
+    //        {
+    //            _lastTimeLbInForeground = DateTime.Now;
+    //        }
+    //        else if (hwnd == SteamProcessInfo.SteamProcess.MainWindowHandle)
+    //        {
+    //            var timeSinceLbGotFocus = DateTime.Now.Subtract(_lastTimeLbInForeground);
 
-                Logger.Info("Forcing LaunchBox window into the foreground because Steam window stole focus.");
-                ActiveWindow.SetForegroundWindow(Utilities.GetLaunchBoxProcess().MainWindowHandle);
-                DisableActiveWindowHook();
-            }
-        }
+    //            if (timeSinceLbGotFocus <= TimeSpan.FromSeconds(Settings.Config.TotalSecondsToPreventSteamFocus))
+    //            {
+    //                Logger.Info("Forcing LaunchBox window into the foreground because Steam window stole focus.");
+    //                WindowMgmt.SetForegroundWindow(lbMainWindowHandle);
+    //                DisableActiveWindowHook();
+    //            }
+    //        }
 
-        /// <summary>
-        /// Indicates whether this custom menu item supports multiple games being selected simultaneously.
-        /// </summary>
-        public bool SupportsMultipleGames => false;
+    //        _lastForegroundWindowHandle = hwnd;
+    //    }
 
-        /// <summary>
-        /// Determines if this custom menu item should be enabled in BigBox mode.
-        /// </summary>
-        public bool ShowInBigBox => true;
+    //    /// <summary>
+    //    /// Forces Steam window to the background (bottom of Z-order).
+    //    /// </summary>
+    //    private static void SendSteamWindowToBackground()
+    //    {
+    //        Logger.Info($"Forcing Steam window into the background because config item '{nameof(Settings.Config.PreventSteamFocusStealing)}' is enabled.");
 
-        /// <summary>
-        /// Determines if this custom menu item should be enabled in the normal LaunchBox interface.
-        /// </summary>
-        public bool ShowInLaunchBox => true;
+    //        var steamWindowHandle = SteamProcessInfo.SteamProcess.MainWindowHandle;
+    //        if (steamWindowHandle == IntPtr.Zero)
+    //            return;
 
-        /// <summary>
-        /// The icon shown next to the text label for this custom menu item.
-        /// </summary>
-        public Image IconImage => Properties.Resources.SteamIcon;
+    //        Logger.Info($"Calling '{nameof(WindowMgmt.SetWindowPos)}' on window handle '{steamWindowHandle.ToInt64():X}'.");
 
-        /// <summary>
-        /// The text label for this custom menu item.
-        /// </summary>
-        public string Caption => "Launch via Steam";
+    //        WindowMgmt.SetWindowPos(
+    //            steamWindowHandle,
+    //            WindowMgmt.HWND_BOTTOM,
+    //            0, 0, 0, 0,
+    //            WindowMgmt.SetWindowPosFlags.SWP_NOMOVE |
+    //            WindowMgmt.SetWindowPosFlags.SWP_NOSIZE |
+    //            WindowMgmt.SetWindowPosFlags.SWP_NOACTIVATE |
+    //            WindowMgmt.SetWindowPosFlags.SWP_ASYNCWINDOWPOS);
+    //    }
 
-        /// <summary>
-        /// Executes when a single game is selected and decides whether this custom menu item should be enabled.
-        /// </summary>
-        /// <param name="selectedGame">The currently selected game's class info.</param>
-        /// <returns></returns>
-        public bool GetIsValidForGame(IGame selectedGame)
-        {
-            return true;
-        }
+    //    /// <summary>
+    //    /// Indicates whether this custom menu item supports multiple games being selected simultaneously.
+    //    /// </summary>
+    //    public bool SupportsMultipleGames => false;
 
-        /// <summary>
-        /// Executes when multiple games are selected simultaneously and decides whether this custom menu item should be enabled.
-        /// </summary>
-        /// <param name="selectedGames">An array of the currently selected game's class info.</param>
-        /// <returns>A bool value which determines whether this custom menu item should be enabled.</returns>
-        public bool GetIsValidForGames(IGame[] selectedGames) { throw new NotImplementedException(); }
+    //    /// <summary>
+    //    /// Determines if this custom menu item should be enabled in BigBox mode.
+    //    /// </summary>
+    //    public bool ShowInBigBox => false;
+    //    //public bool ShowInBigBox => !Settings.Config.UniversalSteamLaunching;
 
-        /// <summary>
-        /// This callback executes whenever a single game is selected and this custom menu item is clicked .
-        /// </summary>
-        /// <param name="selectedGame">The currently selected game's class info.</param>
-        public void OnSelected(IGame selectedGame)
-        {
-            if (selectedGame == null)
-                return;
+    //    /// <summary>
+    //    /// Determines if this custom menu item should be enabled in the normal LaunchBox interface.
+    //    /// </summary>
+    //    public bool ShowInLaunchBox => false;
+    //    //public bool ShowInLaunchBox => !Settings.Config.UniversalSteamLaunching;
 
-            var gameShortcut = GameShortcut.CreateGameShortcut(selectedGame);
-            var steamShortcut = gameShortcut.GenerateSteamShortcut();
-            steamShortcut.LaunchShortcut();
+    //    /// <summary>
+    //    /// The icon shown next to the text label for this custom menu item.
+    //    /// </summary>
+    //    public Image IconImage => Resources.Logo2_32_Image;
+    //    //public Image IconImage => Image.FromStream(Resources.Logo2_32?.Stream);
 
-            if (Config.Instance.PreventSteamFocusStealing)
-            {
-                EnableActiveWindowHook();
-            }
-        }
+    //    /// <summary>
+    //    /// The text label for this custom menu item.
+    //    /// </summary>
+    //    public string Caption => "Launch via Steam";
 
-        /// <summary>
-        /// This callback executes whenever there are multiple games selected simultaneously and this custom menu item is clicked.
-        /// </summary>
-        /// <param name="selectedGames">An array of the currently selected games' class info.</param>
-        public void OnSelected(IGame[] selectedGames) { throw new NotImplementedException(); }
-    }
+    //    /// <summary>
+    //    /// Executes when a single game is selected and decides whether this custom menu item should be enabled.
+    //    /// </summary>
+    //    /// <param name="selectedGame">The currently selected game's class info.</param>
+    //    /// <returns></returns>
+    //    public bool GetIsValidForGame(IGame selectedGame)
+    //    {
+    //        return true;
+    //    }
+
+    //    /// <summary>
+    //    /// Executes when multiple games are selected simultaneously and decides whether this custom menu item should be enabled.
+    //    /// </summary>
+    //    /// <param name="selectedGames">An array of the currently selected game's class info.</param>
+    //    /// <returns>A bool value which determines whether this custom menu item should be enabled.</returns>
+    //    public bool GetIsValidForGames(IGame[] selectedGames) { throw new NotImplementedException(); }
+
+    //    /// <summary>
+    //    /// This callback executes whenever a single game is selected and this custom menu item is clicked .
+    //    /// </summary>
+    //    /// <param name="selectedGame">The currently selected game's class info.</param>
+    //    public void OnSelected(IGame selectedGame)
+    //    {
+    //        if (selectedGame == null)
+    //            return;
+
+    //        GameShortcut gameShortcut = null;
+    //        SteamShortcutManager steamShortcut = null;
+
+    //        try
+    //        {
+    //            gameShortcut = GameShortcut.CreateGameShortcut(selectedGame);
+    //            steamShortcut = gameShortcut.GenerateSteamShortcut();
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            Logger.Error($"An error occurred while generating the Steam shortcut: {ex.Message}");
+    //        }
+
+    //        if (gameShortcut == null || steamShortcut == null)
+    //            return;
+
+    //        IEmulator emulator = null;
+    //        if (gameShortcut.GetType() == typeof(EmulatorShortcut))
+    //        {
+    //            emulator = ((EmulatorShortcut)gameShortcut).Emulator;
+    //            emulator.ApplicationPath = SteamProcessInfo.SteamExePath;
+    //        }
+
+    //        var overrideCmdLine = steamShortcut.ShortcutUrl;
+
+    //        try
+    //        {
+    //            PluginHelper.LaunchBoxMainViewModel.PlayGame(gameShortcut.LaunchBoxGame, null, emulator, overrideCmdLine);
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            Logger.Error($"An error occurred while launching the Steam shortcut: {ex.Message}");
+    //            return;
+    //        }
+
+    //        if (Settings.Config.PreventSteamFocusStealing && Settings.Config.TotalSecondsToPreventSteamFocus > 0)
+    //        {
+    //            EnableActiveWindowHook();
+    //        }
+    //    }
+
+    //    /// <summary>
+    //    /// This callback executes whenever there are multiple games selected simultaneously and this custom menu item is clicked.
+    //    /// </summary>
+    //    /// <param name="selectedGames">An array of the currently selected games' class info.</param>
+    //    public void OnSelected(IGame[] selectedGames) { throw new NotImplementedException(); }
+    //}
 }

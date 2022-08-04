@@ -1,12 +1,17 @@
 ﻿using System.Xml.Serialization;
 
-namespace SteamLauncher.Settings
+namespace SteamLauncher.DataStore
 {
     /// <summary>
     /// Class used by the SteamLauncher config to define each custom platform name.
     /// </summary>
     public class Platform
     {
+        public Platform()
+        {
+
+        }
+
         /// <summary>
         /// The platform's original name as defined by LaunchBox.
         /// </summary>
@@ -17,11 +22,6 @@ namespace SteamLauncher.Settings
         /// The user-defined custom platform name to rename the platform to.
         /// </summary>
         [XmlAttribute]
-        public string Custom { get; set; }
-
-        public Platform()
-        {
-
-        }
+        public string Custom { get; set; } = "";
     }
 }
