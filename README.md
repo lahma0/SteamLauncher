@@ -61,7 +61,7 @@ To launch a game/rom/emulator in LaunchBox/BigBox via Steam:
 
 * Once SteamLauncher is enabled, all games/roms/emulators will be intercepted by SteamLauncher and launched through Steam.
 
-### Customize Platform Names
+## Customize Platform Names
 
 When games/roms are launched with SteamLauncher enabled, the title and platform of the game/rom will be displayed in one's Steam status in the format of: 'Game Title (Platform Name)'.
 
@@ -74,20 +74,20 @@ Friends on Steam will see this title in one's status whenever a particular game/
 ![Platform Names](/assets/images/SteamLauncher-SettingsWindow-PlatformNames.png)
 
 
-### Selective Use
+## Selective Use
 
 The 'Selective Use' feature allows one to precisely customize the circumstances under which SteamLauncher will be enabled/disabled. The settings for this feature can be found in the 'Selective Use' tab in the SteamLauncher settings dialog.
 
 ![Selective Use](/assets/images/SteamLauncher-SettingsWindow-SelectiveUse.png)
 
-#### Filter Mode
+### Filter Mode
 
 'Filter Mode' defines how the entries in the 'Filter List' will be applied.
 * **Blacklist**: SteamLauncher will always be enabled except when a matching filter is found.
 * **Whitelist**: SteamLauncher will always be disabled except when a matching filter is found.
 * **Off**: Disable the 'Selective Use' feature entirely.
 
-#### Filters List
+### Filters List
 
 The 'Filters List' is a list of user defined filters that control when SteamLauncher will be enabled/disabled.
 * **Enable**: This checkbox must be checked for a particular filter list entry to be enabled. If not checked, it will be completely ignored.
@@ -107,7 +107,7 @@ The 'Filters List' is a list of user defined filters that control when SteamLaun
 !['SLEnabled' Custom Field Entry](/assets/images/SteamLauncher-SLEnabled_Custom_Field_Entry.png)
 
 
-### VTables 'Automatic Online Updates'
+## VTables 'Automatic Online Updates'
 
 'Automatic Online Updates' of vtables definitions can be enabled/disabled in the 'Miscellaneous' tab of the SteamLauncher settings dialog. For SteamLauncher to properly work it has to access internal Steam features that are not meant to be accessed by developers outside of Valve. To access these undocumented, unexported functions, SteamLauncher uses a set of definitions which define what these functions are, their function signatures (their parameters, return values, and how to call them), and where to find them within the Steam client DLL. These definitions can change whenever Valve releases a new Steam update and if they change significantly, they can cause SteamLauncher to stop working correctly. In order for SteamLauncher to continue working properly, without the author manually patching the plugin and releasing a new SteamLauncher update every time this happens, an online database was created that can be updated when one of these changes happens, allowing SteamLauncher to continue functioning normally. If 'Automatic Online Updates' is enabled, SteamLauncher will automatically check for new updates every time LaunchBox/BigBox is launched. If new definitions are available, it will silently update and continue working normally. If automatic updates are not enabled, one can manually check for new updates by clicking the 'Force Update' button.
 
@@ -119,6 +119,26 @@ The 'Filters List' is a list of user defined filters that control when SteamLaun
 If you have ANY problems with the plugin, I want to know about them. If you need help with any technical issue (see 'Logs'), want to suggest a new feature (I'm very open to any ideas), just want to chat, or anything else related to the plugin, visit the support thread at the link below. I am also available to chat on Steam for any urgent issues or if more direct help is needed.
 
 Plugin Support Thread: https://forums.launchbox-app.com/topic/43142-steamlauncher/
+
+### Logs
+
+To provide help with any technical problems or to investigate a bug, I will need a copy of the debug log that is generated whenever 'Log Level' is set to 'Verbose'. To enable and collect 'Verbose' debug logs, do the following:
+
+* Open the SteamLauncher settings dialog.
+
+* Click the dropdown box under 'Log Level' and select 'Verbose'.
+
+* Click the 'Save' button.
+
+* Restart LaunchBox/BigBox.
+
+* Now simply repeat whatever behavior was causing the issue and/or bug, and after you're sure you've replicated the behavior, close LaunchBox/BigBox.
+
+* Look inside of the SteamLauncher directory for a file named 'debug.log' (there may be more than one sequentially named log file if there was an enormous amount of output but this is unlikely if verbose logging was turned on just briefly).
+
+* Open this 'debug.log' file in a text editor, copy its entire contents, and paste/upload it to [pastebin.com](https://pastebin.com/).
+
+* In the [SteamLauncher support thread](https://forums.launchbox-app.com/topic/43142-steamlauncher/), provide the PasteBin URL, the details of the problem you encountered, and the particulars of your setup (Windows version, 32-bit or 64-bit, LaunchBox version, Steam version, SteamLauncher plugin version, etc). The more information the better.
 
 ### Contact Information
 
@@ -156,9 +176,9 @@ https://forums.launchbox-app.com/topic/43142-steamlauncher/
 
 **Helpful members of the LaunchBox community**: The_Keeper86, JedExodus, FromLostDays, HTPCei, Corgana, Benuno, Neil9000 (sorry for anyone I'm forgetting)
 
-### Known Issues
+## Known Issues
 
-#### MAME Compatibility Fix
+### MAME Compatibility Fix
 
 It has been observed that MAME crashes when launched through a non-Steam shortcut. This problem is not directly related to SteamLauncher, but since SteamLauncher relies on non-Steam shortcuts, launching MAME via SteamLauncher was no longer working. After a lot of investigation and tinkering by some dedicated users on the LaunchBox forums (cammelspit and JedExodus), a fix was eventually found for the issue. Whether launching MAME directly via a non-Steam shortcut or via SteamLauncher using LaunchBox/BigBox, the fix is simply to modify the launch parameters to include the following:
 
@@ -168,26 +188,6 @@ It has been observed that MAME crashes when launched through a non-Steam shortcu
 
 If one of these parameters already exists when modifying MAME within LaunchBox, you will obviously need to replace it (don't just add a 2nd instance of '-joystickprovider' or '-keyboardprovider'). You can safely ignore any popups/warnings that LaunchBox displays about pause screen compatibility.
 
-### Logs
-
-To provide help with any technical problems or to investigate a bug, I will need a copy of the debug log that is generated whenever 'Log Level' is set to 'Verbose'. To enable and collect 'Verbose' debug logs, do the following:
-
-* Open the SteamLauncher settings dialog.
-
-* Click the dropdown box under 'Log Level' and select 'Verbose'.
-
-* Click the 'Save' button.
-
-* Restart LaunchBox/BigBox.
-
-* Now simply repeat whatever behavior was causing the issue and/or bug, and after you're sure you've replicated the behavior, close LaunchBox/BigBox.
-
-* Look inside of the SteamLauncher directory for a file named 'debug.log' (there may be more than one sequentially named log file if there was an enormous amount of output but this is unlikely if verbose logging was turned on just briefly).
-
-* Open this 'debug.log' file in a text editor, copy its entire contents, and paste/upload it to [pastebin.com](https://pastebin.com/).
-
-* In the [SteamLauncher support thread](https://forums.launchbox-app.com/topic/43142-steamlauncher/), provide the PasteBin URL, the details of the problem you encountered, and the particulars of your setup (Windows version, 32-bit or 64-bit, LaunchBox version, Steam version, SteamLauncher plugin version, etc). The more information the better.
-
-### Legal Stuff
+## Legal Stuff
 
 ©2022 Valve Corporation. Steam and the Steam logo are trademarks and/or registered trademarks of Valve Corporation in the U.S. and/or other countries.
