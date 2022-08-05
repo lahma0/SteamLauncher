@@ -9,7 +9,10 @@
     <RepositoryUrl>https://github.com/lahma0/SteamLauncher</RepositoryUrl>
     <PackageIcon>Resources\logo1_256.png</PackageIcon>
     <Authors>Lahma</Authors>
-    <PackageReleaseNotes>v0.9.8.2 (Aug 2, 2022)
+    <PackageReleaseNotes>v0.9.8.3 (Aug 5, 2022)
+- The issue mentioned in the previous changelog, concerning temporary shortcut IDs being generated based on empty values for the shortcut name and path, was apparently fixed by Valve almost immediately after the last update was posted. Accordingly, the fix implemented to work around this issue is no longer needed. That work around appears to have been causing another issue related to the desktop overlay being used as opposed to the Big Picture overlay, even when a controller was connected. As a result of all of this, this hotfix update is being pushed out to roll back that work around which should fix the issue with the overlay. Sorry for the inconvenience!
+
+v0.9.8.2 (Aug 2, 2022)
 - A Steam update made massive changes to the IClientShortcuts vtable, removing nearly half of its entries (about 30). Thankfully, none of the removed entries were critical to the functionality needed for the shortcut management the plugin performs. 
 - The Steam update also introduced another change which is what prevented me from fixing the plugin by simply updating the online vtables DB. This change alters the way that temporary shortcuts work, making it so that the method previously used to generate shortcut IDs no longer creates the correct value. The more technical explanation is this: Shortcut IDs for non-Steam shortcuts are generated using the shortcut's name and exe path. Now however, temporary shortcut properties no longer actually show the shortcut title, exe path, or any other properties for that matter. The data obviously still exists but it isn't show and therefore Steam calculates the shortcut ID using these blank values causing Steam to always generate the same shortcut ID for all temporary shortcuts (because it is using blank values for the title and exe path). This may just be a bug but it doesn't really matter bc I am now using Steam's API to launch the game using its app ID instead of creating a shortcut using the shortcut ID.
 	    
@@ -37,7 +40,7 @@ v0.9.7.5 (Feb 13, 2021)
     <Description>A LaunchBox/BigBox plugin to allow games/roms/emulators to be launched with Steam overlay and controller binding support.</Description>
     <AssemblyVersion></AssemblyVersion>
     <FileVersion></FileVersion>
-    <VersionPrefix>0.9.8.2</VersionPrefix>
+    <VersionPrefix>0.9.8.3</VersionPrefix>
     <VersionSuffix></VersionSuffix>
 	<Copyright>Copyright © 2022</Copyright>
   </PropertyGroup>

@@ -1,5 +1,9 @@
 ### Changelog
 
+**v0.9.8.3 NETCore - August 5, 2022**
+* The issue mentioned in the previous changelog, concerning temporary shortcut IDs being generated based on empty values for the shortcut name and path, was apparently fixed by Valve almost immediately after the last update was posted. Accordingly, the fix implemented to work around this issue is no longer needed. That work around appears to have been causing another issue related to the desktop overlay being used as opposed to the Big Picture overlay, even when a controller was connected. As a result of all of this, this hotfix update is being pushed out to roll back that work around which should fix the issue with the overlay. Sorry for the inconvenience!
+
+
 **v0.9.8.2 NETCore - August 2, 2022**
 
 * A Steam update made massive changes to the IClientShortcuts vtable, removing nearly half of its entries (about 30). Thankfully, none of the removed entries were critical to the functionality needed for the shortcut management the plugin performs. 

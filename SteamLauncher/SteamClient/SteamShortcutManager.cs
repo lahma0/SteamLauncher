@@ -121,12 +121,16 @@ namespace SteamLauncher.SteamClient
 
             // Get the ShortcutID for this shortcut so we can construct a Steam shortcut URL
             
-            // As of August 2022, temporary shortcuts properties no longer show any app name or EXE path (or any other
+            // As of August 1st, 2022, temporary shortcuts properties no longer show any app name or EXE path (or any other
             // properties for that matter).. Therefore, to get a valid shortcut ID, you must call 'ResolveShortcutId'
             // with empty strings for EXE path and app name, i.e.: ResolveShortcutId("", "")
 
-            shortcut.ShortcutId = ResolveShortcutId("", "");
-            //shortcut.ShortcutId = ResolveShortcutId(shortcut.ExePathInDoubleQuotes, shortcut.AppName);
+            //shortcut.ShortcutId = ResolveShortcutId("", "");
+
+            // As of August 5th, 2022, there appears to have been another update pushed which fixed the above issue..
+            // temporary shortcuts properties are now being displayed again correctly
+
+            shortcut.ShortcutId = ResolveShortcutId(shortcut.ExePathInDoubleQuotes, shortcut.AppName);
             
             Logger.Info($"'{shortcut.AppName}' ShortcutID resolved to: {shortcut.ShortcutId}");
 
@@ -135,51 +139,58 @@ namespace SteamLauncher.SteamClient
 
         public bool LaunchShortcut()
         {
-            if (AppId <= 0)
-            {
-                Logger.Warning($"Cannot launch Steam shortcut for '{AppName}' because the appID is invalid.");
-                return false;
-            }
+            // Note: For whatever reason, whenever launching a non-Steam shortcut using the 'LaunchShortcut' vtable
+            // entry, the desktop overlay is used instead of the Big Picture overlay, even when a controller is
+            // connected.
 
-            Logger.Info($"Starting Steam shortcut: '{AppName}'");
-            ClientShortcutsVTable.GetVtEntry("LaunchShortcut").Invoke(AppId);
-
-            //if (string.IsNullOrEmpty(ShortcutUrl))
+            // if (AppId <= 0)
             //{
-            //    Logger.Warning("Cannot launch the shortcut because the Steam shortcut URL is null or empty.");
+            //    Logger.Warning($"Cannot launch Steam shortcut for '{AppName}' because the appID is invalid.");
             //    return false;
             //}
 
-            //Logger.Info($"Starting Steam shortcut: {ShortcutUrl}");
+            //Logger.Info($"Starting Steam shortcut: '{AppName}'");
+            //ClientShortcutsVTable.GetVtEntry("LaunchShortcut").Invoke(AppId);
 
-            //var url = ShortcutUrl;
+            // Because of the above stated issue, we instead launch the shortcut by pushing a steam url (that contains
+            // the shortcut ID of our newly created shortcut) to 'cmd /c start {url}' using Process.Start
 
-            //try
-            //{
-            //    // Start the shortcut
-            //    Process.Start(new ProcessStartInfo() {FileName = url, UseShellExecute = true});
-            //}
-            //catch
-            //{
-            //    // hack because of this: https://github.com/dotnet/corefx/issues/10361
-            //    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            //    {
-            //        url = url.Replace("&", "^&");
-            //        Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
-            //    }
-            //    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            //    {
-            //        Process.Start("xdg-open", url);
-            //    }
-            //    else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            //    {
-            //        Process.Start("open", url);
-            //    }
-            //    else
-            //    {
-            //        throw;
-            //    }
-            //}
+            if (string.IsNullOrEmpty(ShortcutUrl))
+            {
+                Logger.Warning("Cannot launch the shortcut because the Steam shortcut URL is null or empty.");
+                return false;
+            }
+
+            Logger.Info($"Starting Steam shortcut: {ShortcutUrl}");
+
+            var url = ShortcutUrl;
+
+            try
+            {
+                // Start the shortcut
+                Process.Start(new ProcessStartInfo() { FileName = url, UseShellExecute = true });
+            }
+            catch
+            {
+                // hack because of this: https://github.com/dotnet/corefx/issues/10361
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    url = url.Replace("&", "^&");
+                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    Process.Start("xdg-open", url);
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    Process.Start("open", url);
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
 
             return true;
