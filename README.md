@@ -170,6 +170,8 @@ https://forums.launchbox-app.com/topic/43142-steamlauncher/
 
 **m4dengi**: [steamclient_tracker](https://bitbucket.org/m4dengi/steamclient_tracker/src/master/) (unfortunately, no longer updated)
 
+**AngryCarrot789**: Used his excellent [WPF dark theme](https://github.com/AngryCarrot789/WPFDarkTheme) as a starting point for the plugin's dark themed UI elements
+
 **cammelspit**: Help with developing the idea and direction for the project
 
 **Nielk1**: Initial inspiration for the project and just a talented programmer to bounce ideas off of
