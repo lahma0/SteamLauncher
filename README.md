@@ -26,7 +26,7 @@ Here are a few of the features provided by SteamLauncher:
 
 ### Requirements
 
-* .NET Core 3.1
+* .NET 6.0
 * Steam for Windows
 * LaunchBox/BigBox
 
@@ -190,4 +190,4 @@ If one of these parameters already exists when modifying MAME within LaunchBox, 
 
 ## Legal Stuff
 
-©2022 Valve Corporation. Steam and the Steam logo are trademarks and/or registered trademarks of Valve Corporation in the U.S. and/or other countries.
+©2023 Valve Corporation. Steam and the Steam logo are trademarks and/or registered trademarks of Valve Corporation in the U.S. and/or other countries.

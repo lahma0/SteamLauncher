@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Drawing;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Resources;
+// ReSharper disable InconsistentNaming
 
 namespace SteamLauncher.Tools
 {
@@ -34,5 +37,12 @@ namespace SteamLauncher.Tools
         /// 32x32 bitmap extracted from <see cref="Logo2_Icon"/>.
         /// </summary>
         public static Image Logo2_32_Image => new Icon(Resources.Logo2_Icon?.Stream).ToBitmap();
+
+        public static Image GetImageByName(string imageName)
+        {
+            return typeof(Resources)?.
+                GetProperty(imageName, BindingFlags.Static | BindingFlags.Public)?.
+                GetValue(null, null) as Image;
+        }
     }
 }

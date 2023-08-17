@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using SteamLauncher.Logging;
 using SteamLauncher.Proxy;
 using SteamLauncher.DataStore;
+using SteamLauncher.SteamClient;
 using Unbroken.LaunchBox.Plugins;
 using Unbroken.LaunchBox.Plugins.Data;
 
@@ -182,6 +183,9 @@ namespace SteamLauncher
             Logger.Info("GameLaunchingPlugin:OnGameExited()");
             ProxyEmu?.DisposeProxyEmulator();
             ProxyEmu = null;
+
+            // Remove the non-Steam shortcut that just exited
+            SteamShortcutManager.RemoveOldShortcut();
         }
 
         /// <summary>

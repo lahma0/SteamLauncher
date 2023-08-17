@@ -1,6 +1,13 @@
 ### Changelog
 
+**v0.9.8.4 NETCore - August 17, 2023**
+
+* The plugin being non-functional for many months was due to a Steam update which changed the way non-Steam shortcut ShortcutID values were generated. After spending WAY too many hours/days/weeks poking and prodding the new update in IDA Pro, a solution to the problem has finally been found. I really appreciate everyone's patience while I worked to solve the issue.1
+* Outside of fixing the issue with the ShortcutID, very little else has changed in this update. For the next update, I'm asking users to submit feature requests to the support thread and I will prioritize the most popular/practical ones. I'm looking forward to implementing some new features instead of troubleshooting annoying Steam-related issues/changes.
+
+
 **v0.9.8.3 NETCore - August 5, 2022**
+
 * The issue mentioned in the previous changelog, concerning temporary shortcut IDs being generated based on empty values for the shortcut name and path, was apparently fixed by Valve almost immediately after the last update was posted. Accordingly, the fix implemented to work around this issue is no longer needed. That work around appears to have been causing another issue related to the desktop overlay being used as opposed to the Big Picture overlay, even when a controller was connected. As a result of all of this, this hotfix update is being pushed out to roll back that work around which should fix the issue with the overlay. Sorry for the inconvenience!
 
 

@@ -17,16 +17,16 @@ namespace SteamLauncher.DataStore
         /// <summary>
         /// User preferences and other configuration data.
         /// </summary>
-        public static Config Config { get; } = null;
+        public static Config Config { get; }
 
         /// <summary>
         /// Repair-related data saved and used in case of an application crash.
         /// </summary>
-        public static Repairs Repairs { get; } = null;
+        public static Repairs Repairs { get; }
 
         /// <summary>
         /// Steam vtable related data.
         /// </summary>
-        public static VTables VTables { get; } = null;
+        public static VTables VTables { get; }
     }
 }

@@ -9,6 +9,7 @@ using SteamLauncher.SteamClient.Interfaces;
 using SteamLauncher.DataStore;
 using SteamLauncher.DataStore.VTablesStore;
 using SteamLauncher.Tools;
+using System.IO;
 
 namespace SteamLauncher.SteamClient
 {
@@ -58,23 +59,32 @@ namespace SteamLauncher.SteamClient
         }
 
         /// <summary>
-        /// Generates an instance of SteamShortcutManager using the data provided to it (presumably by the LaunchBox plugin API inside 'LaunchViaSteamMenuItem').
+        /// Generates an instance of SteamShortcutManager using the data provided to it.
         /// </summary>
         /// <param name="gameName">The title of the game/rom (ex: 'Super Mario Bros.').</param>
-        /// <param name="platformName">The platform that the game/rom runs under (ex: 'Nintendo 64', 'Windows', etc).</param>
-        /// <param name="exePath">The absolute or relative (to LaunchBox dir) path to the exe (emulator, game exe, dosbox exe, etc) meant to run the game/rom.</param>
-        /// <param name="startDir">The absolute or relative (to LaunchBox dir) path to be the working directory of the emulator.</param>
+        /// <param name="platformName">The game/rom platform (ex: 'Nintendo 64', 'Windows', etc).</param>
+        /// <param name="exePath">The absolute or relative (to LaunchBox dir) path of the game/emulator/etc EXE.</param>
+        /// <param name="startDir">The absolute or relative (to LaunchBox dir) path of the game/emulator/etc working
+        /// dir. The dir which the EXE resides in is used by default if a null/empty value is provided.</param>
         /// <param name="args">Any additional arguments to be provided to the exe.</param>
-        /// <param name="iconPath">The path of a PNG to be used as the shortcut's icon (for no icon, use empty string).</param>
+        /// <param name="iconPath">The path of a PNG to be used as the shortcut's icon (use null for no icon).</param>
         /// <returns>An instance of SteamShortcutManager which can be used to launch the game/rom.</returns>
-        public static SteamShortcutManager GenerateShortcut(string gameName, string platformName, string exePath, string startDir, string args, string iconPath="")
+        public static SteamShortcutManager GenerateShortcut(string gameName, 
+                                                            string platformName, 
+                                                            string exePath, 
+                                                            string startDir, 
+                                                            string args, 
+                                                            string iconPath="")
         {
             // Cleanup any existing SteamLauncher shortcuts
             //RemoveAllSteamLauncherShortcuts();
 
             // Alternative to above (to fix issue noted in 'RemoveAllSteamLauncherShortcuts()')
             //ClientShortcuts.RemoveAllTemporaryShortcuts();
-            ClientShortcutsVTable.GetVtEntry("RemoveAllTemporaryShortcuts").Invoke();
+            
+            //ClientShortcutsVTable.GetVtEntry("RemoveAllTemporaryShortcuts").Invoke();
+
+            RemoveOldShortcut();
 
             // Create new SteamShortcutManager instance (which can be used to create/launch a Steam shortcut)
             var shortcut = new SteamShortcutManager();
@@ -117,24 +127,55 @@ namespace SteamLauncher.SteamClient
                                                          shortcut.IconPath);
 
             // Wait a moment to ensure Steam is done altering the shortcut (doubt this is needed.. verify and remove)
-            System.Threading.Thread.Sleep(100);
+            //System.Threading.Thread.Sleep(100);
 
             // Get the ShortcutID for this shortcut so we can construct a Steam shortcut URL
             
-            // As of August 1st, 2022, temporary shortcuts properties no longer show any app name or EXE path (or any other
-            // properties for that matter).. Therefore, to get a valid shortcut ID, you must call 'ResolveShortcutId'
+            // As of August 1st, 2022, temporary shortcut properties no longer show any app name or EXE path (or any 
+            // other properties). Therefore, to get a valid shortcut ID, you must call 'ResolveShortcutId'
             // with empty strings for EXE path and app name, i.e.: ResolveShortcutId("", "")
 
             //shortcut.ShortcutId = ResolveShortcutId("", "");
 
             // As of August 5th, 2022, there appears to have been another update pushed which fixed the above issue..
-            // temporary shortcuts properties are now being displayed again correctly
+            // temporary shortcut properties are now being displayed again correctly
 
-            shortcut.ShortcutId = ResolveShortcutId(shortcut.ExePathInDoubleQuotes, shortcut.AppName);
-            
+            //shortcut.ShortcutId = ResolveShortcutId(shortcut.ExePathInDoubleQuotes, shortcut.AppName);
+
+            // Since the ShortcutID must now be retrieved from shortcuts.vdf (as of Aug 2023), a small wait must be 
+            // implemented to ensure shortcuts.vdf is updated before attempting to retrieve the ShortcutID.
+            while (File.GetLastWriteTime(SteamProcessInfo.ShortcutsVdfPath) < DateTime.Now.AddSeconds(-4))
+                System.Threading.Thread.Sleep(100);
+
+            shortcut.ShortcutId = ShortcutsVdf.GetLastShortcutIdByName(shortcut.AppName);
+
+            if (shortcut.ShortcutId <= 0)
+                throw new Exception($"Failed to resolve ShortcutID for '{shortcut.AppName}'");
+
             Logger.Info($"'{shortcut.AppName}' ShortcutID resolved to: {shortcut.ShortcutId}");
 
             return shortcut;
+        }
+
+        /// <summary>
+        /// Removes the previous non-Steam shortcut generated by SteamLauncher.
+        /// </summary>
+        /// <returns>True if a shortcut was removed; otherwise, false.</returns>
+        public static bool RemoveOldShortcut()
+        {
+            if (Settings.Repairs.LastGeneratedShortcutAppId > 0)
+            {
+                ClientShortcutsVTable.GetVtEntry("RemoveShortcut").Invoke(Settings.Repairs.LastGeneratedShortcutAppId);
+            }
+            else
+            {
+                return false;
+            }
+
+            Logger.Info($"Removed previously generated non-Steam shortcut with AppID '{Settings.Repairs.LastGeneratedShortcutAppId}'.");
+
+            Settings.Repairs.LastGeneratedShortcutAppId = 0;
+            return true;
         }
 
         public bool LaunchShortcut()
@@ -143,7 +184,7 @@ namespace SteamLauncher.SteamClient
             // entry, the desktop overlay is used instead of the Big Picture overlay, even when a controller is
             // connected.
 
-            // if (AppId <= 0)
+            //if (AppId <= 0)
             //{
             //    Logger.Warning($"Cannot launch Steam shortcut for '{AppName}' because the appID is invalid.");
             //    return false;
@@ -208,26 +249,31 @@ namespace SteamLauncher.SteamClient
         /// <returns>The AppID of the newly created Steam shortcut.</returns>
         private static UInt32 CreateSteamLauncherShortcut(string name, string exePath, string cmdLine="", string startDir="", string iconPath="")
         {
-            UInt32 appId = (UInt32)ClientShortcutsVTable.GetVtEntry("AddTemporaryShortcut").Invoke(name, 
-                                                                                                   exePath.Trim('"'), 
-                                                                                                   iconPath.Trim('"'));
+            // ORIG
+            //UInt32 appId = (UInt32)ClientShortcutsVTable.GetVtEntry("AddTemporaryShortcut").Invoke(name,
+            //                                                                                      exePath.Trim('"'),
+            //                                                                                      iconPath.Trim('"'));
+
+            UInt32 appId = (UInt32)ClientShortcutsVTable.GetVtEntry("AddShortcut").
+                Invoke(name, exePath.Trim('"'), iconPath.Trim('"'), startDir.InDblQuotes(), cmdLine);
+
             if (appId == 0)
-            {
-                const string errorMsg = "An unexpected problem occurred while trying to create a SteamLauncher shortcut.";
-                Logger.Error(errorMsg);
-                throw new InvalidOperationException(errorMsg);
-            }
+                throw new Exception("Steam returned an invalid AppID when creating a new shortcut.");
 
-            if (!string.IsNullOrWhiteSpace(startDir))
-                ClientShortcutsVTable.GetVtEntry("SetShortcutStartDir").Invoke(appId, startDir.InDblQuotes());
+            Settings.Repairs.LastGeneratedShortcutAppId = appId;
 
-            if (!string.IsNullOrWhiteSpace(cmdLine))
-                    ClientShortcutsVTable.GetVtEntry("SetShortcutCommandLine").Invoke(appId, cmdLine);
+            // ORIG
+            //if (!string.IsNullOrWhiteSpace(startDir))
+            //    ClientShortcutsVTable.GetVtEntry("SetShortcutStartDir").Invoke(appId, startDir.InDblQuotes());
 
-            ClientShortcutsVTable.GetVtEntry("AddShortcutUserTag").Invoke(appId, DefaultShortcut.TAG);
+            //if (!string.IsNullOrWhiteSpace(cmdLine))
+            //    ClientShortcutsVTable.GetVtEntry("SetShortcutCommandLine").Invoke(appId, cmdLine);
+
+            //ClientShortcutsVTable.GetVtEntry("AddShortcutUserTag").Invoke(appId, DefaultShortcut.TAG);
+            //ClientShortcutsVTable.GetVtEntry("SetAllowOverlay").Invoke(appId, true);
+            //ClientShortcutsVTable.GetVtEntry("SetAllowDesktopConfig").Invoke(appId, true);
+
             //ClientShortcutsVTable.GetVtEntry("SetShortcutHidden").Invoke(appId, true);
-            ClientShortcutsVTable.GetVtEntry("SetAllowOverlay").Invoke(appId, true);
-            ClientShortcutsVTable.GetVtEntry("SetAllowDesktopConfig").Invoke(appId, true);
 
             return appId;
         }

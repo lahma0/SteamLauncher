@@ -1,4 +1,5 @@
 ﻿using SteamLauncher.Attributes;
+using SteamLauncher.DataStore.LaunchBoxSystemMenuItem;
 using SteamLauncher.DataStore.SelectiveUse;
 using SteamLauncher.DataStore.VTablesStore;
 using System;
@@ -174,6 +175,18 @@ namespace SteamLauncher.DataStore
         /// Determines whether <see cref="VTables"/> will automatically update itself online.
         /// </summary>
         public bool AutoUpdateVTables { get; set; } = true;
+
+        public SystemMenuItems SystemMenuItems { get; set; } = new SystemMenuItems();
+
+        ///// <summary>
+        ///// Enable/Disable the 'SteamLauncher Settings' menu item in BigBox.
+        ///// </summary>
+        //public bool ShowSettingsMenuItemInBigBox { get; set; } = true;
+
+        ///// <summary>
+        ///// Enable/Disable the 'Use SteamLauncher' menu item in BigBox.
+        ///// </summary>
+        //public bool ShowUseSteamLauncherMenuItemInBigBox { get; set; } = true;
 
         //public DateTime LastCheckForUpdatedVTables { get; set; } = DateTime.MinValue;
 

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 
 namespace SteamLauncher.Tools
 {
@@ -253,6 +254,55 @@ namespace SteamLauncher.Tools
                 b[y] = (byte)((c1 << 4) + c2);
             }
             return b;
+        }
+
+        /// <summary>
+        /// Finds the last index of a pattern in a byte array.
+        /// </summary>
+        /// <param name="data">The byte array to search for the pattern in.</param>
+        /// <param name="pattern">The pattern to look for in the byte array.</param>
+        /// <returns>The index of the last instance of the pattern found; if the pattern is not found, -1.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static long LastIndexOf(this byte[] data, byte[] pattern)
+        {
+            if (data == null) throw new ArgumentNullException(nameof(data));
+            if (pattern == null) throw new ArgumentNullException(nameof(pattern));
+            if (pattern.LongLength > data.LongLength) return -1;
+
+            var cycles = data.LongLength - pattern.LongLength + 1;
+            for (var dataIndex = cycles; dataIndex > 0; dataIndex--)
+            {
+                if (data[dataIndex] != pattern[0]) continue;
+                long patternIndex;
+                for (patternIndex = pattern.Length - 1; patternIndex >= 1; patternIndex--) if (data[dataIndex + patternIndex] != pattern[patternIndex]) break;
+                if (patternIndex == 0) return dataIndex;
+            }
+            return -1;
+        }
+
+        /// <summary>
+        /// Finds the last index of a pattern in a byte array.
+        /// </summary>
+        /// <param name="data">The byte array to search for the pattern in.</param>
+        /// <param name="pattern">The pattern to look for in the byte array.</param>
+        /// <param name="startIndex">The index to start the search at.</param>
+        /// <returns>The index of the first instance of the pattern found; if the pattern is not found, -1.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static long IndexOf(this byte[] data, byte[] pattern, long startIndex)
+        {
+            if (data == null) throw new ArgumentNullException(nameof(data));
+            if (pattern == null) throw new ArgumentNullException(nameof(pattern));
+            if (pattern.LongLength > data.LongLength) return -1;
+
+            var cycles = data.LongLength - pattern.LongLength + 1;
+            for (var dataIndex = startIndex; dataIndex < cycles; dataIndex++)
+            {
+                if (data[dataIndex] != pattern[0]) continue;
+                long patternIndex;
+                for (patternIndex = pattern.Length - 1; patternIndex >= 1; patternIndex--) if (data[dataIndex + patternIndex] != pattern[patternIndex]) break;
+                if (patternIndex == 0) return dataIndex;
+            }
+            return -1;
         }
     }
 }
