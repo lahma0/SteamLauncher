@@ -144,6 +144,9 @@ namespace SteamLauncher.SteamClient
 
             // Since the ShortcutID must now be retrieved from shortcuts.vdf (as of Aug 2023), a small wait must be 
             // implemented to ensure shortcuts.vdf is updated before attempting to retrieve the ShortcutID.
+            
+            Logger.Info($"The shortcuts.vdf path is '{SteamProcessInfo.ShortcutsVdfPath}'.");
+
             while (File.GetLastWriteTime(SteamProcessInfo.ShortcutsVdfPath) < DateTime.Now.AddSeconds(-4))
                 System.Threading.Thread.Sleep(100);
 

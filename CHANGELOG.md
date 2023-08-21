@@ -1,8 +1,13 @@
 ### Changelog
 
+**v0.9.8.5 NETCore - August 20, 2023**
+
+* Fixed a bug which caused ShortcutID generation to fail on non-English Windows systems.
+
+
 **v0.9.8.4 NETCore - August 17, 2023**
 
-* The plugin being non-functional for many months was due to a Steam update which changed the way non-Steam shortcut ShortcutID values were generated. After spending WAY too many hours/days/weeks poking and prodding the new update in IDA Pro, a solution to the problem has finally been found. I really appreciate everyone's patience while I worked to solve the issue.1
+* The plugin being non-functional for many months was due to a Steam update which changed the way non-Steam shortcut ShortcutID values were generated. After spending WAY too many hours/days/weeks poking and prodding the new update in IDA Pro, a solution to the problem has finally been found. I really appreciate everyone's patience while I worked to solve the issue.
 * Outside of fixing the issue with the ShortcutID, very little else has changed in this update. For the next update, I'm asking users to submit feature requests to the support thread and I will prioritize the most popular/practical ones. I'm looking forward to implementing some new features instead of troubleshooting annoying Steam-related issues/changes.
 
 

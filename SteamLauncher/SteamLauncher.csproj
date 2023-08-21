@@ -9,9 +9,12 @@
     <RepositoryUrl>https://github.com/lahma0/SteamLauncher</RepositoryUrl>
     <PackageIcon>Resources\logo1_256.png</PackageIcon>
     <Authors>Lahma</Authors>
-    <PackageReleaseNotes>v0.9.8.4 (Aug 17, 2023)
+    <PackageReleaseNotes>v0.9.8.5 (Aug 20, 2023)
+- Fixed a bug which caused ShortcutID generation to fail on non-English Windows systems.
 
-- The plugin being non-functional for many months was due to a Steam update which changed the way non-Steam shortcut ShortcutID values were generated. After spending WAY too many hours/days/weeks poking and prodding the new update in IDA Pro, a solution to the problem has finally been found. I really appreciate everyone's patience while I worked to solve the issue.1
+v0.9.8.4 (Aug 17, 2023)
+
+- The plugin being non-functional for many months was due to a Steam update which changed the way non-Steam shortcut ShortcutID values were generated. After spending WAY too many hours/days/weeks poking and prodding the new update in IDA Pro, a solution to the problem has finally been found. I really appreciate everyone's patience while I worked to solve the issue.
 - Outside of fixing the issue with the ShortcutID, very little else has changed in this update. For the next update, I'm asking users to submit feature requests to the support thread and I will prioritize the most popular/practical ones. I'm looking forward to implementing some new features instead of troubleshooting annoying Steam-related issues/changes.
 	    
 v0.9.8.3 (Aug 5, 2022)
@@ -45,7 +48,7 @@ v0.9.7.5 (Feb 13, 2021)
     <Description>A LaunchBox/BigBox plugin to allow games/roms/emulators to be launched with Steam overlay and controller binding support.</Description>
     <AssemblyVersion></AssemblyVersion>
     <FileVersion></FileVersion>
-    <VersionPrefix>0.9.8.4</VersionPrefix>
+    <VersionPrefix>0.9.8.5</VersionPrefix>
     <VersionSuffix></VersionSuffix>
 	<Copyright>Copyright © 2023</Copyright>
   </PropertyGroup>
@@ -55,6 +58,7 @@ v0.9.7.5 (Feb 13, 2021)
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
+    <DebugType>full</DebugType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
@@ -62,6 +66,7 @@ v0.9.7.5 (Feb 13, 2021)
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
+    <DebugType>full</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Unbroken.LaunchBox.Plugins">

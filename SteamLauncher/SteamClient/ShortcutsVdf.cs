@@ -58,21 +58,54 @@ namespace SteamLauncher.SteamClient
         {
             var vdfBytes = GetBytes();
             var shortcutNameBytes = System.Text.Encoding.UTF8.GetBytes(shortcutName);
-            
-            // 41 70 70 4E 61 6D 65 = "AppName"
-            var prefixBytes = new byte[] { 0x01, 0x41, 0x70, 0x70, 0x4E, 0x61, 0x6D, 0x65, 0x00 };
-            var findBytes = new byte[prefixBytes.Length + shortcutNameBytes.Length];
-            Buffer.BlockCopy(prefixBytes, 0, findBytes, 0, prefixBytes.Length);
-            Buffer.BlockCopy(shortcutNameBytes, 0, findBytes, prefixBytes.Length, shortcutNameBytes.Length);
-            var result = vdfBytes.LastIndexOf(findBytes);
-            if (result == -1)
+
+            var shortcutNameIndex = vdfBytes.LastIndexOf(shortcutNameBytes);
+            if (shortcutNameIndex == -1)
                 return 0;
-			
-            var extractedBytes = new byte[4];
-            Buffer.BlockCopy(vdfBytes, Convert.ToInt32(result - 4), extractedBytes, 0, 4);
-            var appIdBytes = new byte[] { 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00 };
-            Buffer.BlockCopy(extractedBytes, 0, appIdBytes, 4, 4);
-            return BitConverter.ToUInt64(appIdBytes, 0);
+
+            var appIdIndex = shortcutNameIndex;
+            while (vdfBytes[appIdIndex] != 0x01)
+            {
+                // Prevent an infinite loop in case something goes wrong
+                if (shortcutNameIndex - appIdIndex > 50)
+                    return 0;
+
+                appIdIndex--;
+            }
+
+            appIdIndex -= 4;
+
+            var appIdBytes = new byte[4];
+            //Buffer.BlockCopy(vdfBytes, Convert.ToInt32(shortcutNameIndex - 13), appIdBytes, 0, 4);
+            Buffer.BlockCopy(vdfBytes, Convert.ToInt32(appIdIndex), appIdBytes, 0, 4);
+            var shortcutIdBytes = new byte[] { 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00 };
+            Buffer.BlockCopy(appIdBytes, 0, shortcutIdBytes, 4, 4);
+            return BitConverter.ToUInt64(shortcutIdBytes, 0);
         }
+
+        //public static UInt64 GetLastShortcutIdByName(string shortcutName)
+        //{
+        //    var vdfBytes = GetBytes();
+        //    var shortcutNameBytes = System.Text.Encoding.UTF8.GetBytes(shortcutName);
+            
+        //    // 41 70 70 4E 61 6D 65 = "AppName"
+
+        //    // On a Windows machine with a different language, 'AppName' is not capitalized.. it is 'appname':
+        //    // 61 70 70 6E 61 6D 65 = "appname"
+
+        //    var prefixBytes = new byte[] { 0x01, 0x41, 0x70, 0x70, 0x4E, 0x61, 0x6D, 0x65, 0x00 };
+        //    var findBytes = new byte[prefixBytes.Length + shortcutNameBytes.Length];
+        //    Buffer.BlockCopy(prefixBytes, 0, findBytes, 0, prefixBytes.Length);
+        //    Buffer.BlockCopy(shortcutNameBytes, 0, findBytes, prefixBytes.Length, shortcutNameBytes.Length);
+        //    var result = vdfBytes.LastIndexOf(findBytes);
+        //    if (result == -1)
+        //        return 0;
+			
+        //    var extractedBytes = new byte[4];
+        //    Buffer.BlockCopy(vdfBytes, Convert.ToInt32(result - 4), extractedBytes, 0, 4);
+        //    var appIdBytes = new byte[] { 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00 };
+        //    Buffer.BlockCopy(extractedBytes, 0, appIdBytes, 4, 4);
+        //    return BitConverter.ToUInt64(appIdBytes, 0);
+        //}
     }
 }
